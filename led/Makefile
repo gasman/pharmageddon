@@ -1,7 +1,3 @@
-CFLAGS=-Wall -O3 -g -Wextra -Wno-unused-parameter
-CXXFLAGS=$(CFLAGS)
-OBJECTS=pharma.o effect.o
-BINARIES=pharma
 
 # Where our library resides. You mostly only need to change the
 # RGB_LIB_DISTRIBUTION, this is where the library is checked out.
@@ -11,6 +7,13 @@ RGB_LIBDIR=$(RGB_LIB_DISTRIBUTION)/lib
 RGB_LIBRARY_NAME=rgbmatrix
 RGB_LIBRARY=$(RGB_LIBDIR)/lib$(RGB_LIBRARY_NAME).a
 LDFLAGS+=-L$(RGB_LIBDIR) -l$(RGB_LIBRARY_NAME) -lrt -lm -lpthread
+
+DEMO_DIR = ../demo
+
+CFLAGS=-Wall -O3 -g -Wextra -Wno-unused-parameter
+CXXFLAGS=$(CFLAGS)
+OBJECTS=pharma.o $(DEMO_DIR)/demo.o
+BINARIES=pharma
 
 all : $(BINARIES)
 
@@ -23,14 +26,14 @@ $(RGB_LIBRARY): FORCE
 
 # Since the C example uses the C++ library underneath, which depends on C++
 # runtime stuff, you still have to also link -lstdc++
-pharma : pharma.o effect.o $(RGB_LIBRARY)
-	$(CC) pharma.o effect.o -o $@ $(LDFLAGS) -lstdc++
+pharma : $(OBJECTS) $(RGB_LIBRARY)
+	$(CC) $(OBJECTS) -o $@ $(LDFLAGS) -lstdc++
 
-%.o : %.cc
-	$(CXX) -I$(RGB_INCDIR) $(CXXFLAGS) -c -o $@ $<
+$(DEMO_DIR)/demo.o: FORCE
+	$(MAKE) -C $(DEMO_DIR)
 
 %.o : %.c
-	$(CC) -I$(RGB_INCDIR) $(CFLAGS) -c -o $@ $<
+	$(CC) -I$(RGB_INCDIR) -I$(DEMO_DIR) $(CFLAGS) -c -o $@ $<
 
 clean:
 	rm -f $(OBJECTS) $(BINARIES)

@@ -10,7 +10,7 @@
 #include <time.h>
 #include <unistd.h>
 
-#include "effect.h"
+#include "demo.h"
 
 uint32_t pixels[192 * 192];
 
@@ -40,9 +40,11 @@ int main(int argc, char **argv) {
   fprintf(stderr, "Size: %dx%d. Hardware gpio mapping: %s\n",
           width, height, options.hardware_mapping);
 
+  demo_init();
+
   while (1) {
     uint32_t time = (uint32_t)(clock() * 1000 / CLOCKS_PER_SEC);
-    effect(pixels, time);
+    demo_frame(pixels, time);
 
     /* Top panel */
     for (int y = 0; y < 64; y++) {
