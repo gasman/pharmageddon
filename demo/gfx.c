@@ -218,3 +218,9 @@ void gfx_fillcircle(uint32_t *pixels, int cx, int cy, int r, uint32_t colour) {
         gfx_putpixel(pixels, cx, cy, colour);
     }
 }
+
+void gfx_tri(uint32_t *pixels, int v1x, int v1y, int v2x, int v2y, int v3x, int v3y, uint32_t colour) {
+    gfx_line(pixels, v1x, v1y, v2x, v2y, colour);
+    gfx_line(pixels, v2x, v2y, v3x, v3y, colour);
+    gfx_line(pixels, v3x, v3y, v1x, v1y, colour);
+}
