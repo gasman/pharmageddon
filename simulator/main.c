@@ -58,6 +58,7 @@ int main(int argc, char *argv[])
 
     int running = 1;
     Mix_PlayMusic(music, 1);
+    uint32_t audio_start_time = SDL_GetTicks();
 
     while (running) {
         SDL_Event e;
@@ -68,9 +69,7 @@ int main(int argc, char *argv[])
             }
         }
 
-        uint32_t time = SDL_GetTicks();
-        uint32_t crap_time = (uint32_t)(Mix_GetMusicPosition(music) * 1000);
-        printf("time: %d vs %d\n", time, crap_time);
+        uint32_t time = SDL_GetTicks() - audio_start_time;
 
         demo_frame(pixels, time);
 
