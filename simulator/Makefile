@@ -6,7 +6,7 @@ CC := clang
 DEMO_DIR = ../demo
 
 CFLAGS := `sdl2-config --cflags` -ggdb3 -O0 --std=c99 -Wall -I $(DEMO_DIR)
-LDFLAGS := `sdl2-config --libs`
+LDFLAGS := `sdl2-config --libs` -lSDL2_mixer
 
 # add header files here
 HDRS := $(DEMO_DIR)/demo.h

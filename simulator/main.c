@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <SDL2/SDL.h>
+#include <SDL2/SDL_mixer.h>
 
 #include "demo.h"
 
@@ -10,10 +11,21 @@
 
 int main(int argc, char *argv[])
 {
-    if (SDL_Init(SDL_INIT_VIDEO) != 0) {
-        printf("error initializing SDL: %s\n", SDL_GetError());
+    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) != 0) {
+        printf("Error initializing SDL: %s\n", SDL_GetError());
         return -1;
     }
+
+    int mixer_flags = MIX_INIT_MP3;
+    int mixer_result = Mix_Init(mixer_flags);
+    if (mixer_flags != mixer_result) {
+        printf("Error initialising SDL mixer (result: %d).\n", mixer_result);
+        printf("Mix_Init: %s\n", Mix_GetError());
+        return -1;
+    }
+
+    Mix_OpenAudio(22050, AUDIO_S16SYS, 2, 640);
+    Mix_Music *music = Mix_LoadMUS("../assets/midi-massacre.mp3");
 
     SDL_Window *window = SDL_CreateWindow(
         "Pharmageddon", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
@@ -45,6 +57,7 @@ int main(int argc, char *argv[])
     demo_init();
 
     int running = 1;
+    Mix_PlayMusic(music, 1);
 
     while (running) {
         SDL_Event e;
@@ -56,6 +69,9 @@ int main(int argc, char *argv[])
         }
 
         uint32_t time = SDL_GetTicks();
+        uint32_t crap_time = (uint32_t)(Mix_GetMusicPosition(music) * 1000);
+        printf("time: %d vs %d\n", time, crap_time);
+
         demo_frame(pixels, time);
 
         /* blank out pixels outside the cross */
@@ -74,6 +90,7 @@ int main(int argc, char *argv[])
         SDL_RenderPresent(renderer);
     }
 
+    Mix_FreeMusic(music);
     SDL_Quit(); 
     return 0;
 }
