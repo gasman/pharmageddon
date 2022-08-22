@@ -173,7 +173,7 @@ void gfx_circle(uint32_t *pixels, int cx, int cy, int r, uint32_t colour) {
     int dx, dy;
 
     if (r > 0) invradius = 65536/r; else invradius = 0;
-    dx=0; dy=r-1; ofs=0;
+    dx = 0; dy = r-1; ofs = 0;
     do {
         gfx_putpixel(pixels, cx+dx, cy+dy, colour);
         gfx_putpixel(pixels, cx+dy, cy+dx, colour);
@@ -190,4 +190,31 @@ void gfx_circle(uint32_t *pixels, int cx, int cy, int r, uint32_t colour) {
         dx++; ofs += invradius;
         dy = (int)((r * circletab[(int)(ofs >> 6)]) >> 16);
     } while (dx <= dy);
+}
+
+void gfx_fillcircle(uint32_t *pixels, int cx, int cy, int r, uint32_t colour) {
+    int invradius, ofs;
+    int dx, dy;
+
+    if (r < 0) r = -r;
+    if (r > 3) {
+        invradius = 65536 / r; //else invradius=0;
+        dx=0; dy=r; ofs=0;
+        do {
+            gfx_hline(pixels, cx-dx, cx+dx, cy+dy, colour);
+            gfx_hline(pixels, cx-dx, cx+dx, cy-dy, colour);
+            gfx_hline(pixels, cx-dy, cx+dy, cy+dx, colour);
+            gfx_hline(pixels, cx-dy, cx+dy, cy-dx, colour);
+
+            dx++; ofs += invradius;
+            dy = (int)((r * circletab[(int)(ofs >> 6)]) >> 16);
+        } while (dx <= dy);
+    } else if (r > 1) {
+        gfx_putpixel(pixels, cx, cy, colour);
+        gfx_putpixel(pixels, cx+1, cy, colour);
+        gfx_putpixel(pixels, cx, cy+1, colour);
+        gfx_putpixel(pixels, cx+1, cy+1, colour);
+    } else {
+        gfx_putpixel(pixels, cx, cy, colour);
+    }
 }

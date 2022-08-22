@@ -15,5 +15,5 @@ void boxes_frame(uint32_t *pixels, uint32_t time) {
     }
     int t = (time >> 4) % 64;
     gfx_line(pixels, 64 + t, 128, 128 - t, 191, 0xff000000);
-    gfx_circle(pixels, 96, 96, t, 0x00ffff00);
+    gfx_fillcircle(pixels, 96, 96, t, 0x00ffff00);
 }
