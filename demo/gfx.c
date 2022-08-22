@@ -74,3 +74,16 @@ void gfx_line(uint32_t *pixels, int x1, int y1, int x2, int y2, uint32_t colour)
         }
     }
 }
+
+void gfx_rect(uint32_t *pixels, int x, int y, int w, int h, uint32_t colour) {
+    int x1, y1, x2, y2;
+    x1 = x; y1 = y;
+    x2 = x + w - 1; y2 = y + h - 1;
+
+    if (x2 >= 0 && y2 >= 0 && x1 < WIDTH && y1 < HEIGHT) {
+        gfx_line(pixels, x1, y1, x2, y1, colour);
+        gfx_line(pixels, x1, y2, x2, y2, colour);
+        gfx_line(pixels, x1, y1, x1, y2, colour);
+        gfx_line(pixels, x2, y1, x2, y2, colour);
+    }
+}
