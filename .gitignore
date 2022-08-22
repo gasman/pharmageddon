@@ -1,4 +1,5 @@
 *.o
+*.a
 /simulator/pharma
 /simulator/pharma.exe
 /led/pharma

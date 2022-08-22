@@ -1,6 +1,10 @@
 CFLAGS=-Wall -O3 -g -Wextra -Wno-unused-parameter
+OBJS = demo.o plasma.o
 
-all: demo.o
+all: demo.a
+
+demo.a: $(OBJS)
+	ar rcs $@ $^
 
 %.o : %.c
 	$(CC) -I$(RGB_INCDIR) $(CFLAGS) -c -o $@ $<

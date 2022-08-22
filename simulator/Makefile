@@ -15,7 +15,7 @@ HDRS := $(DEMO_DIR)/demo.h
 SRCS := main.c
 
 # generate names of object files
-OBJS := $(SRCS:.c=.o) $(DEMO_DIR)/demo.o
+OBJS := $(SRCS:.c=.o) $(DEMO_DIR)/demo.a
 
 # name of executable
 EXEC := pharma
@@ -23,7 +23,7 @@ EXEC := pharma
 # default recipe
 all: $(EXEC)
 
-$(DEMO_DIR)/demo.o: FORCE
+$(DEMO_DIR)/demo.a: FORCE
 	$(MAKE) -C $(DEMO_DIR)
 
 # recipe for building the final executable
