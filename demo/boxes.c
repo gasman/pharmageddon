@@ -13,4 +13,6 @@ void boxes_frame(uint32_t *pixels, uint32_t time) {
             gfx_fillrect(pixels, x+2, y+2, x+15, y+15, (time + x + y & 255) << 16);
         }
     }
+    int t = (time >> 4) % 64;
+    gfx_line(pixels, 64 + t, 128, 128 - t, 191, 0xff000000);
 }
