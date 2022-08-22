@@ -12,7 +12,7 @@ DEMO_DIR = ../demo
 
 CFLAGS=-Wall -O3 -g -Wextra -Wno-unused-parameter
 CXXFLAGS=$(CFLAGS)
-OBJECTS=pharma.o $(DEMO_DIR)/demo.o
+OBJECTS=pharma.o $(DEMO_DIR)/demo.a
 BINARIES=pharma
 
 all : $(BINARIES)
@@ -29,7 +29,7 @@ $(RGB_LIBRARY): FORCE
 pharma : $(OBJECTS) $(RGB_LIBRARY)
 	$(CC) $(OBJECTS) -o $@ $(LDFLAGS) -lstdc++
 
-$(DEMO_DIR)/demo.o: FORCE
+$(DEMO_DIR)/demo.a: FORCE
 	$(MAKE) -C $(DEMO_DIR)
 
 %.o : %.c
