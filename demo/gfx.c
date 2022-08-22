@@ -16,16 +16,18 @@ void gfx_putpixel(uint32_t *pixels, int x, int y, uint32_t colour) {
       pixels[(y * WIDTH) + x] = colour;
 }
 
-void gfx_fillrect(uint32_t *pixels, int x1, int y1, int x2, int y2, uint32_t colour) {
-    if (x1 < 0) x1 = 0;
-    if (x2 <= x1) return;
-    if (y1 < 0) y1 = 0;
-    if (y2 <= y1) return;
-    for (int y = y1; y < y2; y++) {
-        if (y >= HEIGHT) return;
-        uint32_t *i = pixels + (y * WIDTH) + x1;
-        for (int x = x1; x < x2; x++) {
-            if (x >= WIDTH) break;
+void gfx_fillrect(uint32_t *pixels, int x, int y, int w, int h, uint32_t colour) {
+    if (x < 0) x = 0;
+    if (w <= 0) return;
+    if (y < 0) y = 0;
+    if (h <= 0) return;
+    int x_end = x + w;
+    if (x_end > WIDTH) x_end = WIDTH;
+    int y_end = y + h;
+    if (y_end > HEIGHT) y_end = HEIGHT;
+    for (int cy = y; cy < y_end; cy++) {
+        uint32_t *i = pixels + (cy * WIDTH) + x;
+        for (int cx = x; cx < x_end; cx++) {
             *i = colour;
             i++;
         }
