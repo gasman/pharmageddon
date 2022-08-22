@@ -24,7 +24,7 @@ int main(int argc, char *argv[])
         return -1;
     }
 
-    Mix_OpenAudio(22050, AUDIO_S16SYS, 2, 640);
+    Mix_OpenAudio(44100, AUDIO_S16SYS, 2, 640);
     Mix_Music *music = Mix_LoadMUS("../assets/midi-massacre.mp3");
 
     SDL_Window *window = SDL_CreateWindow(
