@@ -3,23 +3,29 @@
 # set the compiler
 CC := clang
 
+DEMO_DIR = ../demo
+
 CFLAGS := `sdl2-config --cflags` -ggdb3 -O0 --std=c99 -Wall
 LDFLAGS := `sdl2-config --libs`
+
 # add header files here
-HDRS := effect.h
+HDRS := $(DEMO_DIR)/demo.h
 
 # add source files here
-SRCS := main.c effect.c
+SRCS := main.c
 
 # generate names of object files
-OBJS := $(SRCS:.c=.o)
+OBJS := $(SRCS:.c=.o) $(DEMO_DIR)/demo.o
 
 # name of executable
 EXEC := pharma
 
 # default recipe
 all: $(EXEC)
- 
+
+$(DEMO_DIR)/demo.o: FORCE
+	$(MAKE) -C $(DEMO_DIR)
+
 # recipe for building the final executable
 $(EXEC): $(OBJS) $(HDRS) Makefile
 	$(CC) -o $@ $(OBJS) $(CFLAGS) $(LDFLAGS)
@@ -32,4 +38,4 @@ $(EXEC): $(OBJS) $(HDRS) Makefile
 clean:
 	rm -f $(EXEC) $(OBJS)
 
-.PHONY: all clean
+.PHONY: all clean FORCE

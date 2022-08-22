@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <SDL2/SDL.h>
 
-#include "effect.h"
+#include "demo.h"
 
 #define SCALE 3
 #define WIDTH 192
@@ -42,6 +42,8 @@ int main(int argc, char *argv[])
         return -1;
     }
 
+    demo_init();
+
     int running = 1;
 
     while (running) {
@@ -54,7 +56,7 @@ int main(int argc, char *argv[])
         }
 
         uint32_t time = SDL_GetTicks();
-        effect(pixels, time);
+        demo_frame(pixels, time);
 
         /* blank out pixels outside the cross */
         for (int y = 0; y < 64; y++) {

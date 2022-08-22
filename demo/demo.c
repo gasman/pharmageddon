@@ -1,7 +1,10 @@
 #include <math.h>
-#include "effect.h"
+#include "demo.h"
 
-void effect(uint32_t *pixels, uint32_t time) {
+void demo_init(void) {
+}
+
+void demo_frame(uint32_t *pixels, uint32_t time) {
     double dt = ((double)time) / 499;
 
     for (int y = 0; y < 192; y++) {
