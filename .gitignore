@@ -1,5 +1,7 @@
 *.o
 /simulator/pharma
 /simulator/pharma.exe
+/led/pharma
+/led/pharma.exe
 /led-cpp/pharma
 /led-cpp/pharma.exe
