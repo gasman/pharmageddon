@@ -7,9 +7,9 @@ void demo_init(void) {
 }
 
 void demo_frame(uint32_t *pixels, uint32_t time) {
-    if (time % 8000 < 4000) {
-        plasma_frame(pixels, time);
-    } else {
+    // if (time % 8000 < 4000) {
+    //     plasma_frame(pixels, time);
+    // } else {
         boxes_frame(pixels, time);
-    }
+    // }
 }
