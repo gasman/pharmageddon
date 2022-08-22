@@ -224,3 +224,94 @@ void gfx_tri(uint32_t *pixels, int v1x, int v1y, int v2x, int v2y, int v3x, int 
     gfx_line(pixels, v2x, v2y, v3x, v3y, colour);
     gfx_line(pixels, v3x, v3y, v1x, v1y, colour);
 }
+
+void blitfill(uint32_t *pos, int len, uint32_t colour) {
+    for (int i = 0; i < len; i++) {
+        *pos = colour;
+        pos++;
+    }
+}
+
+void gfx_filltri(uint32_t *pixels, int v1x, int v1y, int v2x, int v2y, int v3x, int v3y, uint32_t colour) {
+    int tempx, tempy;
+    unsigned short *dest16;
+    unsigned int *dest32;
+    int x1,y1,z1,x2,y2,z2,x3,y3,z3;
+    int xstep1,xstep2,xstep3;
+    int startx,endx,px,ry;
+    int dx1,dx2;
+    int dy31,dy21,dy32;
+    int x4,dmx4;
+    int py,xskip,i;
+
+    // Sort points
+    if (v1y > v2y) {
+        tempx = v1x; tempy = v1y;
+        v1x = v2x; v1y = v2y;
+        v2x = tempx; v2y = tempy;
+    }
+    if (v1y > v3y) {
+        tempx = v1x; tempy = v1y;
+        v1x = v3x; v1y = v3y;
+        v3x = tempx; v3y = tempy;
+    }
+    if (v2y > v3y) {
+        tempx = v2x; tempy = v2y;
+        v2x = v3x; v2y = v3y;
+        v3x = tempx; v3y = tempy;
+    }
+    if ((v1y == v2y) && (v1x > v2x)) {   
+        x1 = v2x; x2 = v1x; x3 = v3x;
+    } else {
+        x1 = v1x; x2 = v2x; x3 = v3x;
+    }
+    y1 = v1y; y2 = v2y; y3 = v3y;
+
+    // Calculate Edge steps
+    dy31 = (y3-y1); dy21 = (y2-y1); dy32 = (y3-y2);
+    xstep1 = (x3-x1) << 16; if (dy31>0) xstep1/=dy31;
+    xstep2 = (x2-x1) << 16; if (dy21>0) xstep2/=dy21;
+    xstep3 = (x3-x2) << 16; if (dy32>0) xstep3/=dy32;
+
+    // Start drawing
+    dx1 = x1 << 16; dx2 = dx1;
+    py = y1 * WIDTH;
+
+    // Long edge on the left
+    if (xstep1 < xstep2) {
+        for (ry=y1; ry<=y3; ry++) {
+            startx = dx1 >> 16; endx = dx2 >> 16;
+            if ((ry >= 0) && (ry < HEIGHT) && (startx < WIDTH) && (endx >= 0)) {
+                if (startx < 0) startx = 0;
+                if (endx > WIDTH - 1) endx = WIDTH - 1;
+                if ((endx - startx + 1) > 0) {
+                    blitfill(pixels + startx + py, endx - startx + 1, colour);
+                }
+            }
+            dx1 += xstep1;
+            if (ry < y2) dx2 += xstep2;
+            if (ry == y2) dx2 = x2 << 16;
+            if (ry > y2) dx2 += xstep3;
+            py += WIDTH;
+        }
+    }
+
+    // Long edge on the right
+    if (xstep1 >= xstep2) {
+        for (ry=y1; ry<=y3; ry++) {
+            startx = dx1 >> 16; endx = dx2 >> 16;
+            if ((ry >= 0) && (ry < HEIGHT) && (startx < WIDTH) && (endx >= 0)) {
+                if (startx < 0) startx = 0;
+                if (endx > WIDTH - 1) endx = WIDTH - 1;
+                if ((endx - startx + 1) > 0) {
+                    blitfill(pixels + startx + py, endx - startx + 1, colour);
+                }
+            }
+            dx2 += xstep1;
+            if (ry < y2) dx1 += xstep2;
+            if (ry == y2) dx1 = x2 << 16;
+            if (ry > y2) dx1 += xstep3;
+            py += WIDTH;
+        }
+    }
+}
