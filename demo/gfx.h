@@ -10,3 +10,12 @@ void gfx_circle(uint32_t *pixels, int cx, int cy, int r, uint32_t colour);
 void gfx_fillcircle(uint32_t *pixels, int cx, int cy, int r, uint32_t colour);
 void gfx_tri(uint32_t *pixels, int v1x, int v1y, int v2x, int v2y, int v3x, int v3y, uint32_t colour);
 void gfx_filltri(uint32_t *pixels, int v1x, int v1y, int v2x, int v2y, int v3x, int v3y, uint32_t colour);
+
+typedef struct gfx_image {
+    unsigned char *data;
+    int width;
+    int height;
+} gfx_image;
+
+void gfx_loadimage(char *filename, gfx_image *image);
+void gfx_drawimage(uint32_t *pixels, gfx_image *image, int x, int y);

@@ -1,4 +1,7 @@
 #include <stdlib.h>
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
+
 #include "gfx.h"
 
 #define WIDTH 192
@@ -313,5 +316,39 @@ void gfx_filltri(uint32_t *pixels, int v1x, int v1y, int v2x, int v2y, int v3x, 
             if (ry > y2) dx1 += xstep3;
             py += WIDTH;
         }
+    }
+}
+
+void gfx_loadimage(char *filename, gfx_image *image) {
+    int channels;
+    image->data = stbi_load(filename, &(image->width), &(image->height), &channels, 4);
+}
+
+void gfx_drawimage(uint32_t *pixels, gfx_image *image, int x, int y) {
+    int screen_y = y;
+    unsigned char *image_data_row = image->data;
+
+    for (int image_y = 0; image_y < image->height; image_y++) {
+        if (screen_y >= HEIGHT) return;
+        if (screen_y >= 0) {
+            uint32_t *screen_pos = pixels + screen_y * WIDTH + x;
+            int screen_x = x;
+            unsigned char *image_data_pos = image_data_row;
+            for (int image_x = 0; image_x < image->width; image_x++) {
+                if (screen_x >= WIDTH) break;
+                if (screen_x >= 0 && image_data_pos[3] > 0) {
+                    *screen_pos = (
+                        (image_data_pos[0] << 24)
+                        | (image_data_pos[1] << 16)
+                        | (image_data_pos[2] << 8)
+                    );
+                }
+                screen_pos++;
+                image_data_pos += 4;
+                screen_x++;
+            }
+        }
+        screen_y++;
+        image_data_row += image->width * 4;
     }
 }
