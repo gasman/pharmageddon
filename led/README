@@ -2,5 +2,6 @@ C LED implementation
 ====================
 
 1. Check out https://github.com/hzeller/rpi-rgb-led-matrix in a folder rpi-rgb-led-matrix alongside the root of the pharmageddon repo
-2. from this folder: make
-3. sudo ./pharma --led-rows=64 --led-cols=64 --led-parallel=3 --led-slowdown-gpio=2 --led-pwm-bits=8 --led-chain=2 --led-show-refresh
+2. apt update && apt install libsdl2-dev libsdl2-mixer-dev
+3. From this folder: make
+4. sudo ./pharma --led-rows=64 --led-cols=64 --led-parallel=3 --led-slowdown-gpio=2 --led-pwm-bits=8 --led-chain=2 --led-show-refresh
