@@ -8,7 +8,6 @@
 
 #include <stdio.h>
 #include <string.h>
-#include <time.h>
 #include <unistd.h>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_mixer.h>
@@ -18,6 +17,22 @@
 uint32_t pixels[192 * 192];
 
 int main(int argc, char **argv) {
+  if (SDL_Init(SDL_INIT_AUDIO) != 0) {
+    printf("Error initializing SDL: %s\n", SDL_GetError());
+    return -1;
+  }
+
+  int mixer_flags = MIX_INIT_MP3;
+  int mixer_result = Mix_Init(mixer_flags);
+  if (mixer_flags != mixer_result) {
+    printf("Error initialising SDL mixer (result: %d).\n", mixer_result);
+    printf("Mix_Init: %s\n", Mix_GetError());
+    return -1;
+  }
+
+  Mix_OpenAudio(44100, AUDIO_S16SYS, 2, 640);
+  Mix_Music *music = Mix_LoadMUS("../assets/midi-massacre.mp3");
+
   struct RGBLedMatrixOptions options;
   struct RGBLedMatrix *matrix;
   struct LedCanvas *offscreen_canvas;
@@ -43,43 +58,13 @@ int main(int argc, char **argv) {
   fprintf(stderr, "Size: %dx%d. Hardware gpio mapping: %s\n",
           width, height, options.hardware_mapping);
 
-  if (SDL_Init(SDL_INIT_AUDIO) != 0) {
-    printf("Error initializing SDL: %s\n", SDL_GetError());
-    return -1;
-  }
-
-int i;
-
-for (i = 0; i < SDL_GetNumAudioDrivers(); ++i) {
-    printf("Audio driver %d: %s\n", i, SDL_GetAudioDriver(i));
-}
-
-int device_count = SDL_GetNumAudioDevices(0);
-printf("Found %d audio devices\n", device_count);
-printf("Audio device 0: %s\n", SDL_GetAudioDeviceName(0, 0));
-for (i = 0; i < device_count; ++i) {
-    printf("Audio device %d: %s\n", i, SDL_GetAudioDeviceName(i, 0));
-}
-
-/*
-  int mixer_flags = MIX_INIT_MP3;
-  int mixer_result = Mix_Init(mixer_flags);
-  if (mixer_flags != mixer_result) {
-    printf("Error initialising SDL mixer (result: %d).\n", mixer_result);
-    printf("Mix_Init: %s\n", Mix_GetError());
-    return -1;
-  }
-
-  Mix_OpenAudio(44100, AUDIO_S16SYS, 2, 640);
-  Mix_Music *music = Mix_LoadMUS("../assets/midi-massacre.mp3");
-*/
   demo_init();
 
-  // Mix_PlayMusic(music, 1);
+  Mix_PlayMusic(music, 1);
   uint32_t audio_start_time = SDL_GetTicks();
 
   while (1) {
-    uint32_t time = (uint32_t)(clock() * 1000 / CLOCKS_PER_SEC);
+    uint32_t time = (uint32_t)(SDL_GetTicks() - audio_start_time);
     demo_frame(pixels, time);
 
     /* Top panel */
