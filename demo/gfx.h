@@ -19,3 +19,4 @@ typedef struct gfx_image {
 
 void gfx_loadimage(char *filename, gfx_image *image);
 void gfx_drawimage(uint32_t *pixels, gfx_image *image, int x, int y);
+void gfx_rotateimage(uint32_t *pixels, gfx_image *image, double cx, double cy, double r, double s);

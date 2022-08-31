@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <math.h>
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
@@ -350,5 +351,46 @@ void gfx_drawimage(uint32_t *pixels, gfx_image *image, int x, int y) {
         }
         screen_y++;
         image_data_row += image->width * 4;
+    }
+}
+
+void gfx_rotateimage(uint32_t *pixels, gfx_image *image, double cx, double cy, double r, double s) {
+    /* width / height as measured from centre */
+    double w = ((double)image->width) / 2.0;
+    double h = ((double)image->height) / 2.0;
+
+    /* calculate bounding box of rotated / scaled image */
+    double cr = cos(r);
+    double sr = sin(r);
+    double wcr = fabs(s*w*cr);
+    double hsr = fabs(s*h*sr);
+    double hcr = fabs(s*h*cr);
+    double wsr = fabs(s*w*sr);
+
+    int min_x = (int)floor(cx - wcr - hsr);
+    if (min_x < 0) min_x = 0;
+    int max_x = (int)ceil(cx + wcr + hsr);
+    if (max_x > 191) max_x = 191;
+    int min_y = (int)floor(cy - hcr - wsr);
+    if (min_y < 0) min_y = 0;
+    int max_y = (int)ceil(cy + hcr + wsr);
+    if (max_y > 191) max_y = 191;
+
+    for (int sy = min_y; sy <= max_y; sy++) {
+        for (int sx = min_x; sx <= max_x; sx++) {
+            double rx = ((double)sx - cx) / s;
+            double ry = ((double)sy - cy) / s;
+            int ix = (int)round(rx * cr + ry * sr + w);
+            int iy = (int)round(ry * cr - rx * sr + h);
+            if (ix >= 0 && ix < image->width && iy >= 0 && iy < image->height) {
+                unsigned char *pix_val = (image->data) + (iy * image->width + ix) * 4;
+                if (pix_val[3] > 0) {
+                    uint32_t *scr_pos = pixels + sy * 192 + sx;
+                    *scr_pos = (
+                        (pix_val[0] << 24) | (pix_val[1] << 16) | (pix_val[2] << 8)
+                    );
+                }
+            }
+        }
     }
 }

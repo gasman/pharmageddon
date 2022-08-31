@@ -20,6 +20,6 @@ void boxes_frame(uint32_t *pixels, uint32_t time) {
     int t = (time >> 4) % 64;
     gfx_filltri(pixels, 64, 191, 64 + t, 128, 127, 128+t, 0xff000000);
     gfx_fillcircle(pixels, 96, 96, t, 0x00ffff00);
-    int patarty_y = -abs((int)(20.0 * sin(((double)time) / 109)));
-    gfx_drawimage(pixels, &patarty, 96 - patarty.width / 2, 96 + patarty_y - patarty.height / 2);
+    /* int patarty_y = -abs((int)(20.0 * sin(((double)time) / 109))); */
+    gfx_rotateimage(pixels, &patarty, 96.0, 96.0, (double)time / 100.0, 1.5);
 }
