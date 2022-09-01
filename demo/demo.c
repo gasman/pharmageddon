@@ -2,15 +2,19 @@
 #include "boxes.h"
 #include "rotozoom.h"
 #include "crosstunnel.h"
+#include "credits.h"
 
 void demo_init(void) {
     crosstunnel_init();
     plasma_init();
     rotozoom_init();
     boxes_init();
+    credits_init();
 }
 
 void demo_frame(uint32_t *pixels, uint32_t time) {
+    credits_frame(pixels, time);
+    /*
     uint32_t scene = (time / 5486) % 4;
     switch (scene) {
         case 0:
@@ -25,4 +29,5 @@ void demo_frame(uint32_t *pixels, uint32_t time) {
         default:
             plasma_frame(pixels, time);
     }
+    */
 }
