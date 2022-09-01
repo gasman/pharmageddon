@@ -13,9 +13,7 @@ void demo_init(void) {
 }
 
 void demo_frame(uint32_t *pixels, uint32_t time) {
-    credits_frame(pixels, time);
-    /*
-    uint32_t scene = (time / 5486) % 4;
+    uint32_t scene = (time / 5486) % 5;
     switch (scene) {
         case 0:
             crosstunnel_frame(pixels, time);
@@ -26,8 +24,10 @@ void demo_frame(uint32_t *pixels, uint32_t time) {
         case 2:
             boxes_frame(pixels, time);
             break;
+        case 3:
+            credits_frame(pixels, time);
+            break;
         default:
             plasma_frame(pixels, time);
     }
-    */
 }
