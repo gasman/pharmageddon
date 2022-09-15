@@ -3,6 +3,7 @@
 #include "rotozoom.h"
 #include "crosstunnel.h"
 #include "credits.h"
+#include "teapot.h"
 
 void demo_init(void) {
     crosstunnel_init();
@@ -10,10 +11,11 @@ void demo_init(void) {
     rotozoom_init();
     boxes_init();
     credits_init();
+    teapot_init();
 }
 
 void demo_frame(uint32_t *pixels, uint32_t time) {
-    uint32_t scene = (time / 5486) % 5;
+    uint32_t scene = (time / 5486) % 6;
     switch (scene) {
         case 0:
             crosstunnel_frame(pixels, time);
@@ -26,6 +28,9 @@ void demo_frame(uint32_t *pixels, uint32_t time) {
             break;
         case 3:
             credits_frame(pixels, time);
+            break;
+        case 4:
+            teapot_frame(pixels, time);
             break;
         default:
             plasma_frame(pixels, time);
