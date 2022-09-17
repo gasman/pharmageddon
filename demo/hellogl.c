@@ -7,6 +7,7 @@
 #include "hellogl.h"
 
 typedef float t_mat4x4[16];
+char debug_log[512];
 
 static inline void mat4x4_ortho( t_mat4x4 out, float left, float right, float bottom, float top, float znear, float zfar )
 {
@@ -37,13 +38,12 @@ static inline void mat4x4_ortho( t_mat4x4 out, float left, float right, float bo
 
 static const char * vertex_shader =
     "#version 330\n"
-    "in vec2 i_position;\n"
-    "in vec4 i_color;\n"
+    "in vec3 i_position;\n"
     "out vec4 v_color;\n"
     "uniform mat4 u_projection_matrix;\n"
     "void main() {\n"
-    "    v_color = i_color;\n"
-    "    gl_Position = u_projection_matrix * vec4( i_position, 0.0, 1.0 );\n"
+    "    v_color = vec4(1.0, -i_position.z, 0.0, 1.0);\n"
+    "    gl_Position = u_projection_matrix * vec4( i_position, 1.0 );\n"
     "}\n";
 
 static const char * fragment_shader =
@@ -53,12 +53,6 @@ static const char * fragment_shader =
     "void main() {\n"
     "    o_color = v_color;\n"
     "}\n";
-
-typedef enum t_attrib_id
-{
-    attrib_position,
-    attrib_color
-} t_attrib_id;
 
 GLuint vao, vbo;
 
@@ -76,7 +70,8 @@ void hellogl_init(void) {
     glGetShaderiv( vs, GL_COMPILE_STATUS, &status );
     if( status == GL_FALSE )
     {
-        fprintf( stderr, "vertex shader compilation failed\n" );
+        glGetShaderInfoLog(vs, 512, NULL, debug_log);
+        fprintf( stderr, "vertex shader compilation failed: %s\n", debug_log);
         return;
     }
 
@@ -87,7 +82,8 @@ void hellogl_init(void) {
     glGetShaderiv( fs, GL_COMPILE_STATUS, &status );
     if( status == GL_FALSE )
     {
-        fprintf( stderr, "fragment shader compilation failed\n" );
+        glGetShaderInfoLog(fs, 512, NULL, debug_log);
+        fprintf( stderr, "fragment shader compilation failed: %s\n", debug_log );
         return;
     }
 
@@ -95,8 +91,7 @@ void hellogl_init(void) {
     glAttachShader( program, vs );
     glAttachShader( program, fs );
 
-    glBindAttribLocation( program, attrib_position, "i_position" );
-    glBindAttribLocation( program, attrib_color, "i_color" );
+    glBindAttribLocation( program, 0, "i_position" );
     glLinkProgram( program );
 
     glUseProgram( program );
@@ -109,32 +104,30 @@ void hellogl_init(void) {
     glBindVertexArray( vao );
     glBindBuffer( GL_ARRAY_BUFFER, vbo );
 
-    glEnableVertexAttribArray( attrib_position );
-    glEnableVertexAttribArray( attrib_color );
+    glEnableVertexAttribArray( 0 );
 
-    glVertexAttribPointer( attrib_color, 4, GL_FLOAT, GL_FALSE, sizeof( float ) * 6, 0 );
-    glVertexAttribPointer( attrib_position, 2, GL_FLOAT, GL_FALSE, sizeof( float ) * 6, ( void * )(4 * sizeof(float)) );
+    glVertexAttribPointer( 0, 3, GL_FLOAT, GL_FALSE, sizeof( float ) * 3, 0 );
 
     const GLfloat g_vertex_buffer_data[] = {
-    /*  R, G, B, A, X, Y  */
-        1, 0, 0, 1, 48, 48,
-        0, 1, 0, 1, 144, 48,
-        0, 0, 1, 1, 144, 144,
+    /*  X, Y, Z  */
+        -0.5, -0.5, 0,
+        0.5, -0.5, 0,
+        0.5, 0.5, -1,
 
-        1, 0, 0, 1, 48, 48,
-        0, 0, 1, 1, 144, 144,
-        1, 1, 1, 1, 48, 144
+        -0.5, -0.5, 0,
+        0.5, 0.5, -1,
+        -0.5, 0.5, 0
     };
 
     glBufferData( GL_ARRAY_BUFFER, sizeof( g_vertex_buffer_data ), g_vertex_buffer_data, GL_STATIC_DRAW );
 
     t_mat4x4 projection_matrix;
-    mat4x4_ortho( projection_matrix, 0.0f, 192.0f, 192.0f, 0.0f, 0.0f, 100.0f );
+    mat4x4_ortho( projection_matrix, -1.0f, 1.0f, -1.0f, 1.0f, 0.0f, 100.0f );
     glUniformMatrix4fv( glGetUniformLocation( program, "u_projection_matrix" ), 1, GL_FALSE, projection_matrix );
 }
 
 void hellogl_frame(uint32_t *pixels, uint32_t time) {
-    glClear( GL_COLOR_BUFFER_BIT );
+    glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
     glBindVertexArray( vao );
     glDrawArrays( GL_TRIANGLES, 0, 6 );
 
