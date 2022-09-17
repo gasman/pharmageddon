@@ -54,7 +54,7 @@ static const char * fragment_shader =
     "    o_color = v_color;\n"
     "}\n";
 
-GLuint vao, vbo;
+GLuint vao, vbo, index_buffer;
 
 void hellogl_init(void) {
     GLuint vs, fs, program;
@@ -113,13 +113,19 @@ void hellogl_init(void) {
         -0.5, -0.5, 0,
         0.5, -0.5, 0,
         0.5, 0.5, -1,
-
-        -0.5, -0.5, 0,
-        0.5, 0.5, -1,
         -0.5, 0.5, 0
     };
 
+    GLubyte indices[] = {
+        0, 1, 2,
+        0, 2, 3
+    };
+
     glBufferData( GL_ARRAY_BUFFER, sizeof( g_vertex_buffer_data ), g_vertex_buffer_data, GL_STATIC_DRAW );
+
+    glGenBuffers(1, &index_buffer);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, index_buffer);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
     t_mat4x4 projection_matrix;
     mat4x4_ortho( projection_matrix, -1.0f, 1.0f, -1.0f, 1.0f, 0.0f, 100.0f );
@@ -129,7 +135,7 @@ void hellogl_init(void) {
 void hellogl_frame(uint32_t *pixels, uint32_t time) {
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
     glBindVertexArray( vao );
-    glDrawArrays( GL_TRIANGLES, 0, 6 );
+    glDrawElements( GL_TRIANGLES, 6, GL_UNSIGNED_BYTE, 0 );
 
     glReadPixels(0, 0, 192, 192, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
 }
