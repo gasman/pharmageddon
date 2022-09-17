@@ -1,7 +1,10 @@
+#define GL_GLEXT_PROTOTYPES
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_mixer.h>
+#include <SDL2/SDL_opengl.h>
 
 #include "demo.h"
 
@@ -27,6 +30,12 @@ int main(int argc, char *argv[])
     Mix_OpenAudio(44100, AUDIO_S16SYS, 2, 640);
     Mix_Music *music = Mix_LoadMUS("../assets/midi-massacre.mp3");
 
+    SDL_GL_SetAttribute( SDL_GL_DOUBLEBUFFER, 0 );
+    SDL_GL_SetAttribute( SDL_GL_ACCELERATED_VISUAL, 1 );
+    SDL_GL_SetAttribute( SDL_GL_CONTEXT_MAJOR_VERSION, 3 );
+    SDL_GL_SetAttribute( SDL_GL_CONTEXT_MINOR_VERSION, 2 );
+    SDL_GL_SetAttribute( SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE );
+
     SDL_Window *window = SDL_CreateWindow(
         "Pharmageddon", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
         WIDTH * SCALE, HEIGHT * SCALE,
@@ -36,6 +45,22 @@ int main(int argc, char *argv[])
         printf("Failed to create window: %s\n", SDL_GetError());
         return -1;
     }
+    SDL_GLContext context = SDL_GL_CreateContext( window );
+
+    GLuint renderbuffer, framebuffer, depthbuffer;
+    glGenFramebuffers(1, &framebuffer);
+    glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
+
+    glGenRenderbuffers(1, &renderbuffer);
+    glBindRenderbuffer(GL_RENDERBUFFER, renderbuffer);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_RGBA8, 192, 192);
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, renderbuffer);
+
+    glGenRenderbuffers(1, &depthbuffer);
+    glBindRenderbuffer(GL_RENDERBUFFER, depthbuffer);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT16, 192, 192);
+    /* TODO: set up stencil buffer too? */
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthbuffer);
 
     SDL_Renderer *renderer = SDL_CreateRenderer(window,
         -1, SDL_RENDERER_SOFTWARE);
@@ -90,6 +115,8 @@ int main(int argc, char *argv[])
     }
 
     Mix_FreeMusic(music);
-    SDL_Quit(); 
+    SDL_GL_DeleteContext(context);
+    SDL_DestroyWindow(window);
+    SDL_Quit();
     return 0;
 }

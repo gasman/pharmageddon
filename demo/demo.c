@@ -5,6 +5,7 @@
 #include "credits.h"
 #include "teapot.h"
 #include "planes.h"
+#include "hellogl.h"
 
 void demo_init(void) {
     crosstunnel_init();
@@ -14,9 +15,12 @@ void demo_init(void) {
     credits_init();
     teapot_init();
     planes_init();
+    hellogl_init();
 }
 
 void demo_frame(uint32_t *pixels, uint32_t time) {
+    hellogl_frame(pixels, time);
+    /*
     uint32_t scene = (time / 5486) % 7;
     switch (scene) {
         case 0:
@@ -40,4 +44,5 @@ void demo_frame(uint32_t *pixels, uint32_t time) {
         default:
             plasma_frame(pixels, time);
     }
+    */
 }
