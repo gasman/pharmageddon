@@ -4,6 +4,7 @@
 #include "crosstunnel.h"
 #include "credits.h"
 #include "teapot.h"
+#include "planes.h"
 
 void demo_init(void) {
     crosstunnel_init();
@@ -12,10 +13,11 @@ void demo_init(void) {
     boxes_init();
     credits_init();
     teapot_init();
+    planes_init();
 }
 
 void demo_frame(uint32_t *pixels, uint32_t time) {
-    uint32_t scene = (time / 5486) % 6;
+    uint32_t scene = (time / 5486) % 7;
     switch (scene) {
         case 0:
             crosstunnel_frame(pixels, time);
@@ -31,6 +33,9 @@ void demo_frame(uint32_t *pixels, uint32_t time) {
             break;
         case 4:
             teapot_frame(pixels, time);
+            break;
+        case 5:
+            planes_frame(pixels, time);
             break;
         default:
             plasma_frame(pixels, time);
