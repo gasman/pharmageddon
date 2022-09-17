@@ -8,3 +8,10 @@
   * `plasma.c`, `plasma.h`, `boxes.c`, `boxes.h` - test effects
 * `led` - code for launching on the real LED display
 * `simulator` - code for launching on the SDL-based simulator
+
+
+## Building (SDL simulator)
+
+You'll need libraries / development headers for SDL2 and Assimp.
+
+From the `simulator` directory, run `make`. Then launch the `pharma` executable.
