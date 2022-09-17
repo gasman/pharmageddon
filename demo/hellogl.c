@@ -1,5 +1,9 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
+#include <assimp/cimport.h>        // Plain-C interface
+#include <assimp/scene.h>          // Output data structure
+#include <assimp/postprocess.h>    // Post processing flags
 
 #define GL_GLEXT_PROTOTYPES
 #include <SDL2/SDL_opengl.h>
@@ -8,6 +12,12 @@
 
 typedef float t_mat4x4[16];
 char debug_log[512];
+const struct aiMesh *teapot;
+unsigned int vertex_count;
+unsigned int face_count;
+
+GLfloat *teapot_vertices;
+GLuint *teapot_faces;
 
 static inline void mat4x4_ortho( t_mat4x4 out, float left, float right, float bottom, float top, float znear, float zfar )
 {
@@ -99,43 +109,64 @@ void hellogl_init(void) {
     glClearColor( 0.0, 0.0, 0.0, 0.0 );
     glViewport( 0, 0, 192, 192 );
 
+    const struct aiScene* scene = aiImportFile( "../assets/teapot.obj",
+        aiProcess_CalcTangentSpace       |
+        aiProcess_Triangulate            |
+        aiProcess_JoinIdenticalVertices  |
+        aiProcess_SortByPType);
+
+    if (scene != NULL) {
+        teapot = scene->mMeshes[0];
+        vertex_count = teapot->mNumVertices;
+        face_count = teapot->mNumFaces;
+
+        teapot_vertices = malloc(vertex_count * 3 * sizeof(GLfloat));
+        GLfloat *vpos = teapot_vertices;
+        for (unsigned int i = 0; i < vertex_count; i++) {
+            *vpos = (GLfloat)(teapot->mVertices[i].x);
+            vpos++;
+            *vpos = (GLfloat)(teapot->mVertices[i].y);
+            vpos++;
+            *vpos = (GLfloat)(teapot->mVertices[i].z);
+            vpos++;
+        }
+
+        teapot_faces = malloc(face_count * 3 * sizeof(GLuint));
+        GLuint *fpos = teapot_faces;
+        for (unsigned int i = 0; i < face_count; i++) {
+            struct aiFace face = teapot->mFaces[i];
+            *fpos = (GLuint)(face.mIndices[0]);
+            fpos++;
+            *fpos = (GLuint)(face.mIndices[1]);
+            fpos++;
+            *fpos = (GLuint)(face.mIndices[2]);
+            fpos++;
+        }
+    } else {
+        printf("obj import failed: %s\n", aiGetErrorString());
+    }
+
     glGenVertexArrays( 1, &vao );
     glGenBuffers( 1, &vbo );
     glBindVertexArray( vao );
     glBindBuffer( GL_ARRAY_BUFFER, vbo );
-
     glEnableVertexAttribArray( 0 );
-
     glVertexAttribPointer( 0, 3, GL_FLOAT, GL_FALSE, sizeof( float ) * 3, 0 );
-
-    const GLfloat g_vertex_buffer_data[] = {
-    /*  X, Y, Z  */
-        -0.5, -0.5, 0,
-        0.5, -0.5, 0,
-        0.5, 0.5, -1,
-        -0.5, 0.5, 0
-    };
-
-    GLubyte indices[] = {
-        0, 1, 2,
-        0, 2, 3
-    };
-
-    glBufferData( GL_ARRAY_BUFFER, sizeof( g_vertex_buffer_data ), g_vertex_buffer_data, GL_STATIC_DRAW );
+    glBufferData( GL_ARRAY_BUFFER, vertex_count * 3 * sizeof(GLfloat), teapot_vertices, GL_STATIC_DRAW );
 
     glGenBuffers(1, &index_buffer);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, index_buffer);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, face_count * 3 * sizeof(GLuint), teapot_faces, GL_STATIC_DRAW);
 
     t_mat4x4 projection_matrix;
-    mat4x4_ortho( projection_matrix, -1.0f, 1.0f, -1.0f, 1.0f, 0.0f, 100.0f );
+    mat4x4_ortho( projection_matrix, -5.0f, 5.0f, 5.0f, -5.0f, 0.0f, 100.0f );
     glUniformMatrix4fv( glGetUniformLocation( program, "u_projection_matrix" ), 1, GL_FALSE, projection_matrix );
 }
 
 void hellogl_frame(uint32_t *pixels, uint32_t time) {
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
     glBindVertexArray( vao );
-    glDrawElements( GL_TRIANGLES, 6, GL_UNSIGNED_BYTE, 0 );
+    glDrawElements( GL_TRIANGLES, face_count * 3, GL_UNSIGNED_INT, 0 );
 
     glReadPixels(0, 0, 192, 192, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
 }
