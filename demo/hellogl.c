@@ -50,10 +50,10 @@ static const char * vertex_shader =
     "#version 330\n"
     "in vec3 i_position;\n"
     "out vec4 v_color;\n"
-    "uniform mat4 u_projection_matrix;\n"
+    "uniform mat4 u_transform;\n"
     "void main() {\n"
     "    v_color = vec4(1.0, -i_position.z, 0.0, 1.0);\n"
-    "    gl_Position = u_projection_matrix * vec4( i_position, 1.0 );\n"
+    "    gl_Position = u_transform * vec4( i_position, 1.0 );\n"
     "}\n";
 
 static const char * fragment_shader =
@@ -65,6 +65,8 @@ static const char * fragment_shader =
     "}\n";
 
 GLuint vao, vbo, index_buffer;
+GLint u_transform;
+t_mat4x4 projection_matrix;
 
 void hellogl_init(void) {
     GLuint vs, fs, program;
@@ -158,12 +160,12 @@ void hellogl_init(void) {
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, index_buffer);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, face_count * 3 * sizeof(GLuint), teapot_faces, GL_STATIC_DRAW);
 
-    t_mat4x4 projection_matrix;
-    mat4x4_ortho( projection_matrix, -5.0f, 5.0f, 5.0f, -5.0f, 0.0f, 100.0f );
-    glUniformMatrix4fv( glGetUniformLocation( program, "u_projection_matrix" ), 1, GL_FALSE, projection_matrix );
+    mat4x4_ortho( projection_matrix, -5.0f, 5.0f, 7.0f, -3.0f, 0.0f, 100.0f );
+    u_transform = glGetUniformLocation( program, "u_transform" );
 }
 
 void hellogl_frame(uint32_t *pixels, uint32_t time) {
+    glUniformMatrix4fv( u_transform, 1, GL_FALSE, projection_matrix );
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
     glBindVertexArray( vao );
     glDrawElements( GL_TRIANGLES, face_count * 3, GL_UNSIGNED_INT, 0 );
