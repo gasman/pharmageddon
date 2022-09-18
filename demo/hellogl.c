@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
 #include <assimp/cimport.h>        // Plain-C interface
 #include <assimp/scene.h>          // Output data structure
 #include <assimp/postprocess.h>    // Post processing flags
@@ -46,13 +47,35 @@ static inline void mat4x4_ortho( t_mat4x4 out, float left, float right, float bo
     #undef T
 }
 
+static inline void mat4x4_mul( t_mat4x4 out, t_mat4x4 m1, t_mat4x4 m2) {
+    out[0] = m1[0]*m2[0] + m1[1]*m2[4] + m1[2]*m2[8] + m1[3]*m2[12];
+    out[1] = m1[0]*m2[1] + m1[1]*m2[5] + m1[2]*m2[9] + m1[3]*m2[13];
+    out[2] = m1[0]*m2[2] + m1[1]*m2[6] + m1[2]*m2[10] + m1[3]*m2[14];
+    out[3] = m1[0]*m2[3] + m1[1]*m2[7] + m1[2]*m2[11] + m1[3]*m2[15];
+
+    out[4] = m1[4]*m2[0] + m1[5]*m2[4] + m1[6]*m2[8] + m1[7]*m2[12];
+    out[5] = m1[4]*m2[1] + m1[5]*m2[5] + m1[6]*m2[9] + m1[7]*m2[13];
+    out[6] = m1[4]*m2[2] + m1[5]*m2[6] + m1[6]*m2[10] + m1[7]*m2[14];
+    out[7] = m1[4]*m2[3] + m1[5]*m2[7] + m1[6]*m2[11] + m1[7]*m2[15];
+
+    out[8] = m1[8]*m2[0] + m1[9]*m2[4] + m1[10]*m2[8] + m1[11]*m2[12];
+    out[9] = m1[8]*m2[1] + m1[9]*m2[5] + m1[10]*m2[9] + m1[11]*m2[13];
+    out[10] = m1[8]*m2[2] + m1[9]*m2[6] + m1[10]*m2[10] + m1[11]*m2[14];
+    out[11] = m1[8]*m2[3] + m1[9]*m2[7] + m1[10]*m2[11] + m1[11]*m2[15];
+
+    out[12] = m1[12]*m2[0] + m1[13]*m2[4] + m1[14]*m2[8] + m1[15]*m2[12];
+    out[13] = m1[12]*m2[1] + m1[13]*m2[5] + m1[14]*m2[9] + m1[15]*m2[13];
+    out[14] = m1[12]*m2[2] + m1[13]*m2[6] + m1[14]*m2[10] + m1[15]*m2[14];
+    out[15] = m1[12]*m2[3] + m1[13]*m2[7] + m1[14]*m2[11] + m1[15]*m2[15];
+}
+
 static const char * vertex_shader =
     "#version 330\n"
     "in vec3 i_position;\n"
     "out vec4 v_color;\n"
     "uniform mat4 u_transform;\n"
     "void main() {\n"
-    "    v_color = vec4(1.0, -i_position.z, 0.0, 1.0);\n"
+    "    v_color = vec4(1.0, i_position.y, 0.5, i_position.x);\n"
     "    gl_Position = u_transform * vec4( i_position, 1.0 );\n"
     "}\n";
 
@@ -66,7 +89,21 @@ static const char * fragment_shader =
 
 GLuint vao, vbo, index_buffer;
 GLint u_transform;
-t_mat4x4 projection_matrix;
+t_mat4x4 projection_matrix, rotation_matrix, transform_matrix;
+
+t_mat4x4 rotation_x_matrix = {
+    1, 0, 0, 0,
+    0, 1, 0, 0,
+    0, 0, 1, 0,
+    0, 0, 0, 1
+};
+
+t_mat4x4 rotation_y_matrix = {
+    1, 0, 0, 0,
+    0, 1, 0, 0,
+    0, 0, 1, 0,
+    0, 0, 0, 1
+};
 
 void hellogl_init(void) {
     GLuint vs, fs, program;
@@ -148,6 +185,8 @@ void hellogl_init(void) {
         printf("obj import failed: %s\n", aiGetErrorString());
     }
 
+    glEnable(GL_DEPTH_TEST);
+
     glGenVertexArrays( 1, &vao );
     glGenBuffers( 1, &vbo );
     glBindVertexArray( vao );
@@ -160,12 +199,25 @@ void hellogl_init(void) {
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, index_buffer);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, face_count * 3 * sizeof(GLuint), teapot_faces, GL_STATIC_DRAW);
 
-    mat4x4_ortho( projection_matrix, -5.0f, 5.0f, 7.0f, -3.0f, 0.0f, 100.0f );
+    mat4x4_ortho( projection_matrix, -5.0f, 5.0f, 5.0f, -5.0f, -30.0f, 100.0f );
     u_transform = glGetUniformLocation( program, "u_transform" );
 }
 
 void hellogl_frame(uint32_t *pixels, uint32_t time) {
-    glUniformMatrix4fv( u_transform, 1, GL_FALSE, projection_matrix );
+    float rx = ((float)time) / 2345.0;
+    rotation_x_matrix[5] = rotation_x_matrix[10] = cosf(rx);
+    rotation_x_matrix[6] = -sinf(rx);
+    rotation_x_matrix[9] = sinf(rx);
+
+    float ry = ((float)time) / 1000.0;
+    rotation_y_matrix[0] = rotation_y_matrix[10] = cosf(ry);
+    rotation_y_matrix[2] = sinf(ry);
+    rotation_y_matrix[8] = -sinf(ry);
+
+    mat4x4_mul(rotation_matrix, rotation_y_matrix, rotation_x_matrix);
+    mat4x4_mul(transform_matrix, rotation_matrix, projection_matrix);
+
+    glUniformMatrix4fv( u_transform, 1, GL_FALSE, transform_matrix );
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
     glBindVertexArray( vao );
     glDrawElements( GL_TRIANGLES, face_count * 3, GL_UNSIGNED_INT, 0 );
