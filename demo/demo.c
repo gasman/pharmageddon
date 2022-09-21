@@ -5,6 +5,7 @@
 #include "credits.h"
 #include "teapot.h"
 #include "planes.h"
+#include "boards.h"
 
 void demo_init(void) {
     crosstunnel_init();
@@ -14,6 +15,7 @@ void demo_init(void) {
     credits_init();
     teapot_init();
     planes_init();
+    boards_init();
 }
 
 void demo_frame(uint32_t *pixels, uint32_t time) {
@@ -36,6 +38,9 @@ void demo_frame(uint32_t *pixels, uint32_t time) {
             break;
         case 5:
             planes_frame(pixels, time);
+            break;
+        case 6:
+            boards_frame(pixels, time);
             break;
         default:
             plasma_frame(pixels, time);

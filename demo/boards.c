@@ -3,10 +3,10 @@
 #include <stdlib.h>
 #include "gfx.h"
 
-void linework_init() {
+void boards_init() {
 }
 
-void linework_frame(uint32_t *pixels, uint32_t time)
+void boards_frame(uint32_t *pixels, uint32_t time)
 {
 int t=time/20;
 int part=t>>8;
