@@ -6,6 +6,7 @@
 #include "teapot.h"
 #include "planes.h"
 #include "boards.h"
+#include "video.h"
 
 void demo_init(void) {
     crosstunnel_init();
@@ -16,33 +17,28 @@ void demo_init(void) {
     teapot_init();
     planes_init();
     boards_init();
+    video_init();
 }
 
 void demo_frame(uint32_t *pixels, uint32_t time) {
-    uint32_t scene = (time / 5486) % 7;
+    uint32_t scene = (time / 5486) % 5;
     switch (scene) {
         case 0:
             crosstunnel_frame(pixels, time);
             break;
         case 1:
-            rotozoom_frame(pixels, time);
+            video_frame(pixels, time);
             break;
         case 2:
-            boxes_frame(pixels, time);
-            break;
-        case 3:
             credits_frame(pixels, time);
             break;
-        case 4:
+        case 3:
             teapot_frame(pixels, time);
             break;
-        case 5:
+        case 4:
             planes_frame(pixels, time);
             break;
-        case 6:
-            boards_frame(pixels, time);
-            break;
         default:
-            plasma_frame(pixels, time);
+            boards_frame(pixels, time);
     }
 }
