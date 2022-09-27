@@ -72,10 +72,11 @@ static inline void mat4x4_mul( t_mat4x4 out, t_mat4x4 m1, t_mat4x4 m2) {
 static const char * vertex_shader =
     "#version 330\n"
     "in vec3 i_position;\n"
+    "in vec3 i_normal;\n"
     "out vec4 v_color;\n"
     "uniform mat4 u_transform;\n"
     "void main() {\n"
-    "    v_color = vec4(1.0, i_position.y, 0.5, i_position.x);\n"
+    "    v_color = vec4(i_normal.x * 0.5 + 0.5, i_normal.y * 0.5 + 0.5, i_normal.z * 0.5 + 0.5, 1);\n"
     "    gl_Position = u_transform * vec4( i_position, 1.0 );\n"
     "}\n";
 
@@ -141,6 +142,8 @@ void hellogl_init(void) {
     glAttachShader( program, fs );
 
     glBindAttribLocation( program, 0, "i_position" );
+    glBindAttribLocation( program, 1, "i_normal" );
+
     glLinkProgram( program );
 
     glUseProgram( program );
@@ -152,6 +155,7 @@ void hellogl_init(void) {
         aiProcess_CalcTangentSpace       |
         aiProcess_Triangulate            |
         aiProcess_JoinIdenticalVertices  |
+        aiProcess_GenSmoothNormals       |
         aiProcess_SortByPType);
 
     if (scene != NULL) {
@@ -159,7 +163,7 @@ void hellogl_init(void) {
         vertex_count = teapot->mNumVertices;
         face_count = teapot->mNumFaces;
 
-        teapot_vertices = malloc(vertex_count * 3 * sizeof(GLfloat));
+        teapot_vertices = malloc(vertex_count * 6 * sizeof(GLfloat));
         GLfloat *vpos = teapot_vertices;
         for (unsigned int i = 0; i < vertex_count; i++) {
             *vpos = (GLfloat)(teapot->mVertices[i].x);
@@ -167,6 +171,12 @@ void hellogl_init(void) {
             *vpos = (GLfloat)(teapot->mVertices[i].y);
             vpos++;
             *vpos = (GLfloat)(teapot->mVertices[i].z);
+            vpos++;
+            *vpos = (GLfloat)(teapot->mNormals[i].x);
+            vpos++;
+            *vpos = (GLfloat)(teapot->mNormals[i].y);
+            vpos++;
+            *vpos = (GLfloat)(teapot->mNormals[i].z);
             vpos++;
         }
 
@@ -191,8 +201,10 @@ void hellogl_init(void) {
     glGenBuffers( 1, &vbo );
     glBindVertexArray( vao );
     glBindBuffer( GL_ARRAY_BUFFER, vbo );
-    glEnableVertexAttribArray( 0 );
-    glVertexAttribPointer( 0, 3, GL_FLOAT, GL_FALSE, sizeof( float ) * 3, 0 );
+    glEnableVertexAttribArray( 0 ); /* positions */
+    glEnableVertexAttribArray( 1 ); /* normals */
+    glVertexAttribPointer( 0, 3, GL_FLOAT, GL_FALSE, sizeof( float ) * 6, 0 );
+    glVertexAttribPointer( 1, 3, GL_FLOAT, GL_FALSE, sizeof( float ) * 6, ( void * )(3 * sizeof(float)) );
     glBufferData( GL_ARRAY_BUFFER, vertex_count * 3 * sizeof(GLfloat), teapot_vertices, GL_STATIC_DRAW );
 
     glGenBuffers(1, &index_buffer);
