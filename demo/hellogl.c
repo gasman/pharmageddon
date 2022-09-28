@@ -9,9 +9,9 @@
 #define GL_GLEXT_PROTOTYPES
 #include <SDL2/SDL_opengl.h>
 
+#include "matrix.h"
 #include "hellogl.h"
 
-typedef float t_mat4x4[16];
 char debug_log[512];
 const struct aiMesh *teapot;
 unsigned int vertex_count;
@@ -20,7 +20,7 @@ unsigned int face_count;
 GLfloat *teapot_vertices;
 GLuint *teapot_faces;
 
-static inline void mat4x4_ortho( t_mat4x4 out, float left, float right, float bottom, float top, float znear, float zfar )
+static inline void mat4x4_ortho( mat4 out, float left, float right, float bottom, float top, float znear, float zfar )
 {
     #define T(a, b) (a * 4 + b)
 
@@ -47,7 +47,7 @@ static inline void mat4x4_ortho( t_mat4x4 out, float left, float right, float bo
     #undef T
 }
 
-static inline void mat4x4_mul( t_mat4x4 out, t_mat4x4 m1, t_mat4x4 m2) {
+static inline void mat4x4_mul( mat4 out, mat4 m1, mat4 m2) {
     out[0] = m1[0]*m2[0] + m1[1]*m2[4] + m1[2]*m2[8] + m1[3]*m2[12];
     out[1] = m1[0]*m2[1] + m1[1]*m2[5] + m1[2]*m2[9] + m1[3]*m2[13];
     out[2] = m1[0]*m2[2] + m1[1]*m2[6] + m1[2]*m2[10] + m1[3]*m2[14];
@@ -90,16 +90,16 @@ static const char * fragment_shader =
 
 GLuint vao, vbo, index_buffer;
 GLint u_transform;
-t_mat4x4 projection_matrix, rotation_matrix, transform_matrix;
+mat4 projection_matrix, rotation_matrix, transform_matrix;
 
-t_mat4x4 rotation_x_matrix = {
+mat4 rotation_x_matrix = {
     1, 0, 0, 0,
     0, 1, 0, 0,
     0, 0, 1, 0,
     0, 0, 0, 1
 };
 
-t_mat4x4 rotation_y_matrix = {
+mat4 rotation_y_matrix = {
     1, 0, 0, 0,
     0, 1, 0, 0,
     0, 0, 1, 0,
