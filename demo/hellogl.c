@@ -47,37 +47,17 @@ static inline void mat4x4_ortho( mat4 out, float left, float right, float bottom
     #undef T
 }
 
-static inline void mat4x4_mul( mat4 out, mat4 m1, mat4 m2) {
-    out[0] = m1[0]*m2[0] + m1[1]*m2[4] + m1[2]*m2[8] + m1[3]*m2[12];
-    out[1] = m1[0]*m2[1] + m1[1]*m2[5] + m1[2]*m2[9] + m1[3]*m2[13];
-    out[2] = m1[0]*m2[2] + m1[1]*m2[6] + m1[2]*m2[10] + m1[3]*m2[14];
-    out[3] = m1[0]*m2[3] + m1[1]*m2[7] + m1[2]*m2[11] + m1[3]*m2[15];
-
-    out[4] = m1[4]*m2[0] + m1[5]*m2[4] + m1[6]*m2[8] + m1[7]*m2[12];
-    out[5] = m1[4]*m2[1] + m1[5]*m2[5] + m1[6]*m2[9] + m1[7]*m2[13];
-    out[6] = m1[4]*m2[2] + m1[5]*m2[6] + m1[6]*m2[10] + m1[7]*m2[14];
-    out[7] = m1[4]*m2[3] + m1[5]*m2[7] + m1[6]*m2[11] + m1[7]*m2[15];
-
-    out[8] = m1[8]*m2[0] + m1[9]*m2[4] + m1[10]*m2[8] + m1[11]*m2[12];
-    out[9] = m1[8]*m2[1] + m1[9]*m2[5] + m1[10]*m2[9] + m1[11]*m2[13];
-    out[10] = m1[8]*m2[2] + m1[9]*m2[6] + m1[10]*m2[10] + m1[11]*m2[14];
-    out[11] = m1[8]*m2[3] + m1[9]*m2[7] + m1[10]*m2[11] + m1[11]*m2[15];
-
-    out[12] = m1[12]*m2[0] + m1[13]*m2[4] + m1[14]*m2[8] + m1[15]*m2[12];
-    out[13] = m1[12]*m2[1] + m1[13]*m2[5] + m1[14]*m2[9] + m1[15]*m2[13];
-    out[14] = m1[12]*m2[2] + m1[13]*m2[6] + m1[14]*m2[10] + m1[15]*m2[14];
-    out[15] = m1[12]*m2[3] + m1[13]*m2[7] + m1[14]*m2[11] + m1[15]*m2[15];
-}
-
 static const char * vertex_shader =
     "#version 330\n"
     "in vec3 i_position;\n"
     "in vec3 i_normal;\n"
     "out vec4 v_color;\n"
     "uniform mat4 u_transform;\n"
+    "uniform mat4 u_project;\n"
     "void main() {\n"
     "    v_color = vec4(i_normal.x * 0.5 + 0.5, i_normal.y * 0.5 + 0.5, i_normal.z * 0.5 + 0.5, 1);\n"
-    "    gl_Position = u_transform * vec4( i_position, 1.0 );\n"
+    "    vec4 v_position = u_transform * vec4( i_position, 1.0 );\n"
+    "    gl_Position = u_project * v_position;\n"
     "}\n";
 
 static const char * fragment_shader =
@@ -89,22 +69,8 @@ static const char * fragment_shader =
     "}\n";
 
 GLuint vao, vbo, index_buffer;
-GLint u_transform;
-mat4 projection_matrix, rotation_matrix, transform_matrix;
-
-mat4 rotation_x_matrix = {
-    1, 0, 0, 0,
-    0, 1, 0, 0,
-    0, 0, 1, 0,
-    0, 0, 0, 1
-};
-
-mat4 rotation_y_matrix = {
-    1, 0, 0, 0,
-    0, 1, 0, 0,
-    0, 0, 1, 0,
-    0, 0, 0, 1
-};
+GLint u_transform, u_project;
+mat4 projection_matrix, transform_matrix;
 
 void hellogl_init(void) {
     GLuint vs, fs, program;
@@ -213,23 +179,16 @@ void hellogl_init(void) {
 
     mat4x4_ortho( projection_matrix, -5.0f, 5.0f, 5.0f, -5.0f, -30.0f, 100.0f );
     u_transform = glGetUniformLocation( program, "u_transform" );
+    u_project = glGetUniformLocation( program, "u_project" );
 }
 
 void hellogl_frame(uint32_t *pixels, uint32_t time) {
-    float rx = ((float)time) / 2345.0;
-    rotation_x_matrix[5] = rotation_x_matrix[10] = cosf(rx);
-    rotation_x_matrix[6] = -sinf(rx);
-    rotation_x_matrix[9] = sinf(rx);
-
-    float ry = ((float)time) / 1000.0;
-    rotation_y_matrix[0] = rotation_y_matrix[10] = cosf(ry);
-    rotation_y_matrix[2] = sinf(ry);
-    rotation_y_matrix[8] = -sinf(ry);
-
-    mat4x4_mul(rotation_matrix, rotation_y_matrix, rotation_x_matrix);
-    mat4x4_mul(transform_matrix, rotation_matrix, projection_matrix);
+    mat4_identity(transform_matrix);
+    mat4_rotate_x(transform_matrix, ((float)time) / 2345.0);
+    mat4_rotate_y(transform_matrix, ((float)time) / 1000.0);
 
     glUniformMatrix4fv( u_transform, 1, GL_FALSE, transform_matrix );
+    glUniformMatrix4fv( u_project, 1, GL_FALSE, projection_matrix );
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
     glBindVertexArray( vao );
     glDrawElements( GL_TRIANGLES, face_count * 3, GL_UNSIGNED_INT, 0 );
