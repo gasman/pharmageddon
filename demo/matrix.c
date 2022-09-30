@@ -87,3 +87,40 @@ void mat4_rotate_y(mat4 mat, float angle) {
     mat[10] = a02 * s + a22 * c;
     mat[11] = a03 * s + a23 * c;
 }
+
+
+void mat4_to_inverse_mat3(mat4 mat, mat3 dest) {
+    /*
+        Calculates the inverse of the upper 3x3 elements of a mat4 and copies the result into a mat3
+        The resulting matrix is useful for calculating transformed normals
+    */
+    float a00 = mat[0];
+    float a01 = mat[1];
+    float a02 = mat[2];
+
+    float a10 = mat[4];
+    float a11 = mat[5];
+    float a12 = mat[6];
+
+    float a20 = mat[8];
+    float a21 = mat[9];
+    float a22 = mat[10];
+
+    float b01 = a22 * a11 - a12 * a21;
+    float b11 = -a22 * a10 + a12 * a20;
+    float b21 = a21 * a10 - a11 * a20;
+
+    float d = a00 * b01 + a01 * b11 + a02 * b21;
+
+    float id = 1.0 / d;
+
+    dest[0] = b01 * id;
+    dest[1] = (-a22 * a01 + a02 * a21) * id;
+    dest[2] = (a12 * a01 - a02 * a11) * id;
+    dest[3] = b11 * id;
+    dest[4] = (a22 * a00 - a02 * a20) * id;
+    dest[5] = (-a12 * a00 + a02 * a10) * id;
+    dest[6] = b21 * id;
+    dest[7] = (-a21 * a00 + a01 * a20) * id;
+    dest[8] = (a11 * a00 - a01 * a10) * id;
+}

@@ -69,7 +69,7 @@ int main(int argc, char *argv[])
     SDL_RenderSetIntegerScale(renderer, 1);
 
     SDL_Texture *screen_texture = SDL_CreateTexture(renderer,
-        SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STREAMING,
+        SDL_PIXELFORMAT_ABGR8888, SDL_TEXTUREACCESS_STREAMING,
         WIDTH, HEIGHT);
 
     uint32_t *pixels = malloc(WIDTH * HEIGHT * 4);

@@ -51,26 +51,49 @@ static const char * vertex_shader =
     "#version 330\n"
     "in vec3 i_position;\n"
     "in vec3 i_normal;\n"
-    "out vec4 v_color;\n"
+    "out vec4 v_position;\n"
+    "out vec3 v_normal;\n"
     "uniform mat4 u_transform;\n"
+    "uniform mat3 u_normal_transform;\n"
     "uniform mat4 u_project;\n"
     "void main() {\n"
-    "    v_color = vec4(i_normal.x * 0.5 + 0.5, i_normal.y * 0.5 + 0.5, i_normal.z * 0.5 + 0.5, 1);\n"
-    "    vec4 v_position = u_transform * vec4( i_position, 1.0 );\n"
+    "    v_position = u_transform * vec4( i_position, 1.0 );\n"
+    "    v_normal = u_normal_transform * i_normal;\n"
     "    gl_Position = u_project * v_position;\n"
     "}\n";
 
 static const char * fragment_shader =
     "#version 330\n"
-    "in vec4 v_color;\n"
+    "in vec4 v_position;\n"
+    "in vec3 v_normal;\n"
     "out vec4 o_color;\n"
+
+    "const vec3 cAmbientColor = vec3(0.01, 0.01, 0.01);\n"
+    "const vec3 cDiffuseColor = vec3(0.8, 0.8, 0.8);\n"
+    "const vec3 cSpecularColor = vec3(0.3, 0.3, 0.3);\n"
+    "const float cMaterialShininess = 3.0;\n"
+    "const vec3 uLightLocation = vec3(-1.0, 4.0, 4.0);\n"
+    "const vec3 uMaterialColor = vec3(0.0, 1.0, 0.0);\n"
     "void main() {\n"
-    "    o_color = v_color;\n"
+    "    /* calculate diffuse light intensity - angle between light and surface normal */\n"
+    "    vec3 lightDirection = normalize(uLightLocation - v_position.xyz);\n"
+    "    float diffuseLightIntensity = max(dot(v_normal, lightDirection), 0.0);\n"
+
+    "    /* calculate specular light intensity - angle between eye and reflected light */\n"
+    "    vec3 eyeDirection = normalize(-v_position.xyz);\n"
+    "    vec3 reflectionDirection = reflect(-lightDirection, v_normal);\n"
+    "    float specularLightIntensity = pow(max(dot(reflectionDirection, eyeDirection), 0.0), cMaterialShininess);\n"
+
+    "    /* add ambient, diffuse and specular components to give final light colour */\n"
+    "    vec3 lightWeighting = cAmbientColor + cDiffuseColor * diffuseLightIntensity + cSpecularColor * specularLightIntensity;\n"
+
+    "    o_color = vec4(uMaterialColor * lightWeighting, 1.0);\n"
     "}\n";
 
 GLuint vao, vbo, index_buffer;
-GLint u_transform, u_project;
+GLint u_transform, u_normal_transform, u_project;
 mat4 projection_matrix, transform_matrix;
+mat3 normal_transform_matrix;
 
 void hellogl_init(void) {
     GLuint vs, fs, program;
@@ -179,6 +202,7 @@ void hellogl_init(void) {
 
     mat4x4_ortho( projection_matrix, -5.0f, 5.0f, 5.0f, -5.0f, -30.0f, 100.0f );
     u_transform = glGetUniformLocation( program, "u_transform" );
+    u_normal_transform = glGetUniformLocation( program, "u_normal_transform" );
     u_project = glGetUniformLocation( program, "u_project" );
 }
 
@@ -186,8 +210,10 @@ void hellogl_frame(uint32_t *pixels, uint32_t time) {
     mat4_identity(transform_matrix);
     mat4_rotate_x(transform_matrix, ((float)time) / 2345.0);
     mat4_rotate_y(transform_matrix, ((float)time) / 1000.0);
+    mat4_to_inverse_mat3(transform_matrix, normal_transform_matrix);
 
     glUniformMatrix4fv( u_transform, 1, GL_FALSE, transform_matrix );
+    glUniformMatrix3fv( u_normal_transform, 1, GL_FALSE, normal_transform_matrix );
     glUniformMatrix4fv( u_project, 1, GL_FALSE, projection_matrix );
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
     glBindVertexArray( vao );
