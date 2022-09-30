@@ -194,7 +194,7 @@ void hellogl_init(void) {
     glEnableVertexAttribArray( 1 ); /* normals */
     glVertexAttribPointer( 0, 3, GL_FLOAT, GL_FALSE, sizeof( float ) * 6, 0 );
     glVertexAttribPointer( 1, 3, GL_FLOAT, GL_FALSE, sizeof( float ) * 6, ( void * )(3 * sizeof(float)) );
-    glBufferData( GL_ARRAY_BUFFER, vertex_count * 3 * sizeof(GLfloat), teapot_vertices, GL_STATIC_DRAW );
+    glBufferData( GL_ARRAY_BUFFER, vertex_count * 6 * sizeof(GLfloat), teapot_vertices, GL_STATIC_DRAW );
 
     glGenBuffers(1, &index_buffer);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, index_buffer);
