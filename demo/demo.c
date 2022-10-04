@@ -7,6 +7,7 @@
 #include "planes.h"
 #include "boards.h"
 #include "video.h"
+#include "scroller.h"
 
 void demo_init(void) {
     crosstunnel_init();
@@ -18,10 +19,11 @@ void demo_init(void) {
     planes_init();
     boards_init();
     video_init();
+    scroller_init();
 }
 
 void demo_frame(uint32_t *pixels, uint32_t time) {
-    ambulance_frame(pixels, time);
+    scroller_frame(pixels, time);
     /*
     uint32_t scene = (time / 5486) % 5;
     switch (scene) {
