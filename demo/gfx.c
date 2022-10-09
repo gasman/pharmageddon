@@ -229,7 +229,7 @@ void gfx_tri(uint32_t *pixels, int v1x, int v1y, int v2x, int v2y, int v3x, int 
     gfx_line(pixels, v3x, v3y, v1x, v1y, colour);
 }
 
-void blitfill(uint32_t *pos, int len, uint32_t colour) {
+static void blitfill(uint32_t *pos, int len, uint32_t colour) {
     for (int i = 0; i < len; i++) {
         *pos = colour;
         pos++;
