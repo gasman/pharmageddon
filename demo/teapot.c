@@ -50,6 +50,11 @@ void teapot_frame(uint32_t *pixels, uint32_t time) {
 
         transformed_vertices[i].x = v.x * cos(r) + v.z * sin(r);
         transformed_vertices[i].y = v.y;
+        transformed_vertices[i].z = v.z * cos(r) - v.x * sin(r);
+    }
+
+    for (double *zbuffer_ptr = zbuffer; zbuffer_ptr < (zbuffer + 192*192); zbuffer_ptr++) {
+        *zbuffer_ptr = 100000;
     }
 
     for (unsigned int i = 0; i < face_count; i++) {
