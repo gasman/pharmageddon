@@ -58,17 +58,12 @@ void teapot_frame(uint32_t *pixels, uint32_t time) {
         struct aiVector3D v1 = transformed_vertices[face.mIndices[1]];
         struct aiVector3D v2 = transformed_vertices[face.mIndices[2]];
 
-        /* find z component of cross product to test for back-face culling */
-        double xpz = (v1.x - v0.x) * (v2.y - v0.y) - (v1.y - v0.y) * (v2.x - v0.x);
-
-        if (xpz < 0) {
-            vec3 sv1 = {v0.x / 5, v0.y / 5 - 0.3, v0.z};
-            vec3 sv2 = {v1.x / 5, v1.y / 5 - 0.3, v1.z};
-            vec3 sv3 = {v2.x / 5, v2.y / 5 - 0.3, v2.z};
-            gfx3d_flat_tri(
-                pixels, zbuffer, sv1, sv2, sv3,
-                (128 + (i & 127)) * 0x01010100
-            );
-        }
+        vec3 sv1 = {v0.x / 5, v0.y / 5 - 0.3, v0.z};
+        vec3 sv2 = {v1.x / 5, v1.y / 5 - 0.3, v1.z};
+        vec3 sv3 = {v2.x / 5, v2.y / 5 - 0.3, v2.z};
+        gfx3d_flat_tri(
+            pixels, zbuffer, sv1, sv2, sv3,
+            (128 + (i & 127)) * 0x01010100
+        );
     }
 }
