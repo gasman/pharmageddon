@@ -6,12 +6,15 @@
 #include <assimp/scene.h>          // Output data structure
 #include <assimp/postprocess.h>    // Post processing flags
 #include "gfx.h"
+#include "gfx3d.h"
 #include "teapot.h"
 
 struct aiVector3D *transformed_vertices;
 const struct aiMesh *teapot;
 unsigned int vertex_count;
 unsigned int face_count;
+
+double zbuffer[192*192];
 
 void teapot_init(void) {
     // Start the import on the given file with some example postprocessing
@@ -59,14 +62,11 @@ void teapot_frame(uint32_t *pixels, uint32_t time) {
         double xpz = (v1.x - v0.x) * (v2.y - v0.y) - (v1.y - v0.y) * (v2.x - v0.x);
 
         if (xpz < 0) {
-            gfx_filltri(
-                pixels,
-                96 + (int)(v0.x * 20),
-                128 - (int)(v0.y * 20),
-                96 + (int)(v1.x * 20),
-                128 - (int)(v1.y * 20),
-                96 + (int)(v2.x * 20),
-                128 - (int)(v2.y * 20),
+            vec3 sv1 = {v0.x / 5, 0.3 - v0.y / 5, v0.z};
+            vec3 sv2 = {v1.x / 5, 0.3 - v1.y / 5, v1.z};
+            vec3 sv3 = {v2.x / 5, 0.3 - v2.y / 5, v2.z};
+            gfx3d_flat_tri(
+                pixels, zbuffer, sv1, sv2, sv3,
                 (128 + (i & 127)) * 0x01010100
             );
         }

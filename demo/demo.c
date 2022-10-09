@@ -21,6 +21,8 @@ void demo_init(void) {
 }
 
 void demo_frame(uint32_t *pixels, uint32_t time) {
+    teapot_frame(pixels, time);
+    /*
     uint32_t scene = (time / 5486) % 5;
     switch (scene) {
         case 0:
@@ -41,4 +43,5 @@ void demo_frame(uint32_t *pixels, uint32_t time) {
         default:
             boards_frame(pixels, time);
     }
+    */
 }
