@@ -166,6 +166,17 @@ void mat4_to_inverse_mat3(mat4 mat, mat3 dest) {
     dest[8] = (a11 * a00 - a01 * a10) * id;
 }
 
+vec3 vec3_normalize(vec3 vec) {
+    double len = sqrt(vec.x*vec.x + vec.y*vec.y + vec.z*vec.z);
+    vec3 result = {vec.x/len, vec.y/len, vec.z/len};
+    return result;
+}
+
+double vec3_dot(vec3 v1, vec3 v2) {
+    return v1.x*v2.x + v1.y*v2.y + v1.z*v2.z;
+}
+
+
 static void blitfill(uint32_t *pixels, double *zbuffer, int offset, int len, double z1, double z2, uint32_t colour) {
     uint32_t *pixels_pos = pixels + offset;
     double *zbuffer_pos = zbuffer + offset;

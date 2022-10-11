@@ -9,19 +9,24 @@
 #include "gfx3d.h"
 #include "teapot.h"
 
-vec3 *model_vertices;
+typedef struct vertex_in_attrs {
+    vec3 position;
+    vec3 normal;
+} vertex_in_attrs;
+
+typedef struct vertex_out_attrs {
+    vec3 position;
+    uint32_t colour;
+} vertex_out_attrs;
+
 const struct aiMesh *teapot;
 unsigned int vertex_count;
 unsigned int face_count;
 
 double zbuffer[192*192];
 
-typedef struct vertex_attrs {
-    vec3 position;
-    uint32_t colour;
-} vertex_attrs;
-
-vertex_attrs *transformed_vertices;
+vertex_in_attrs *model_vertices;
+vertex_out_attrs *transformed_vertices;
 
 void teapot_init(void) {
     // Start the import on the given file with some example postprocessing
@@ -31,6 +36,7 @@ void teapot_init(void) {
         aiProcess_CalcTangentSpace       |
         aiProcess_Triangulate            |
         aiProcess_JoinIdenticalVertices  |
+        aiProcess_GenSmoothNormals       |
         aiProcess_SortByPType);
 
     if (scene != NULL) {
@@ -38,19 +44,23 @@ void teapot_init(void) {
         vertex_count = teapot->mNumVertices;
         face_count = teapot->mNumFaces;
 
-        model_vertices = malloc(vertex_count * sizeof(vec3));
+        model_vertices = malloc(vertex_count * sizeof(vertex_in_attrs));
         if (model_vertices == NULL) {
             printf("could not allocate model_vertices\n");
         }
 
         for (unsigned int i = 0; i < vertex_count; i++) {
             struct aiVector3D v = teapot->mVertices[i];
-            model_vertices[i].x = v.x;
-            model_vertices[i].y = v.y;
-            model_vertices[i].z = v.z;
+            model_vertices[i].position.x = v.x;
+            model_vertices[i].position.y = v.y;
+            model_vertices[i].position.z = v.z;
+            struct aiVector3D n = teapot->mNormals[i];
+            model_vertices[i].normal.x = n.x;
+            model_vertices[i].normal.y = n.y;
+            model_vertices[i].normal.z = n.z;
         }
 
-        transformed_vertices = malloc(vertex_count * sizeof(vertex_attrs));
+        transformed_vertices = malloc(vertex_count * sizeof(vertex_out_attrs));
         if (transformed_vertices == NULL) {
             printf("could not allocate transformed_vertices\n");
         }
@@ -73,10 +83,17 @@ void teapot_frame(uint32_t *pixels, uint32_t time) {
     mat4_rotate_x(rotate_matrix, ((double)time) / 900);
     // mat4_ortho( projection_matrix, -5.0, 5.0, 5.0, -5.0, -30.0, 100.0 );
 
+    vec3 light_pos = {0, 5, 0};
+
     for (unsigned int i = 0; i < vertex_count; i++) {
-        vec3 pos = mat4_mul_vec3(model_vertices[i], rotate_matrix);
+        vec3 pos = mat4_mul_vec3(model_vertices[i].position, rotate_matrix);
+        vec3 light_dir = {light_pos.x - pos.x, light_pos.y - pos.y, light_pos.z - pos.z};
+        light_dir = vec3_normalize(light_dir);
+        double diffuse = vec3_dot(model_vertices[i].normal, light_dir);
+        if (diffuse < 0) diffuse = 0;
+
         transformed_vertices[i].position = pos; // mat4_mul_vec3(pos, projection_matrix);
-        transformed_vertices[i].colour = ((uint32_t)((4 - pos.z) * 32)) * 0x01010100;
+        transformed_vertices[i].colour = ((uint32_t)(diffuse * 200)) * 0x01010100;
     }
 
     for (double *zbuffer_ptr = zbuffer; zbuffer_ptr < (zbuffer + 192*192); zbuffer_ptr++) {
@@ -85,9 +102,9 @@ void teapot_frame(uint32_t *pixels, uint32_t time) {
 
     for (unsigned int i = 0; i < face_count; i++) {
         struct aiFace face = teapot->mFaces[i];
-        vertex_attrs va0 = transformed_vertices[face.mIndices[0]];
-        vertex_attrs va1 = transformed_vertices[face.mIndices[1]];
-        vertex_attrs va2 = transformed_vertices[face.mIndices[2]];
+        vertex_out_attrs va0 = transformed_vertices[face.mIndices[0]];
+        vertex_out_attrs va1 = transformed_vertices[face.mIndices[1]];
+        vertex_out_attrs va2 = transformed_vertices[face.mIndices[2]];
 
         vec3 v0 = va0.position;
         vec3 v1 = va1.position;

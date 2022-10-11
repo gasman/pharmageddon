@@ -18,4 +18,7 @@ void mat4_rotate_y(mat4 mat, double angle);
 void mat4_translate(mat4 mat, vec3 vec);
 void mat4_to_inverse_mat3(mat4 mat, mat3 dest);
 
+vec3 vec3_normalize(vec3 vec);
+double vec3_dot(vec3 v1, vec3 v2);
+
 void gfx3d_flat_tri(uint32_t *pixels, double *zbuffer, vec3 v1, vec3 v2, vec3 v3, uint32_t colour);
