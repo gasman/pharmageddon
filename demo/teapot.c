@@ -72,6 +72,7 @@ void teapot_init(void) {
 
 void teapot_frame(uint32_t *pixels, uint32_t time) {
     mat4 rotate_matrix;
+    mat3 normal_rotate_matrix;
     // mat4 projection_matrix;
 
     gfx_cls(pixels, 0x00110000);
@@ -82,14 +83,16 @@ void teapot_frame(uint32_t *pixels, uint32_t time) {
     mat4_rotate_y(rotate_matrix, ((double)time) / 1000);
     mat4_rotate_x(rotate_matrix, ((double)time) / 900);
     // mat4_ortho( projection_matrix, -5.0, 5.0, 5.0, -5.0, -30.0, 100.0 );
+    mat4_to_inverse_mat3(rotate_matrix, normal_rotate_matrix);
 
     vec3 light_pos = {0, 5, 0};
 
     for (unsigned int i = 0; i < vertex_count; i++) {
         vec3 pos = mat4_mul_vec3(model_vertices[i].position, rotate_matrix);
+        vec3 normal = mat3_mul_vec3(model_vertices[i].normal, normal_rotate_matrix);
         vec3 light_dir = {light_pos.x - pos.x, light_pos.y - pos.y, light_pos.z - pos.z};
         light_dir = vec3_normalize(light_dir);
-        double diffuse = vec3_dot(model_vertices[i].normal, light_dir);
+        double diffuse = vec3_dot(normal, light_dir);
         if (diffuse < 0) diffuse = 0;
 
         transformed_vertices[i].position = pos; // mat4_mul_vec3(pos, projection_matrix);

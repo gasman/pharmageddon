@@ -78,6 +78,15 @@ vec3 mat4_mul_vec3(vec3 vec, mat4 mat) {
     return out;
 }
 
+vec3 mat3_mul_vec3(vec3 vec, mat3 mat) {
+    vec3 out = {
+        (vec.x*mat[0] + vec.y*mat[1] + vec.z*mat[2]),
+        (vec.x*mat[3] + vec.y*mat[4] + vec.z*mat[5]),
+        (vec.x*mat[6] + vec.y*mat[7] + vec.z*mat[8])
+    };
+    return out;
+}
+
 void mat4_rotate_x(mat4 mat, double angle) {
     double s = sin(angle);
     double c = cos(angle);
