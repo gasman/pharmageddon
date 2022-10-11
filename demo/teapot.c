@@ -9,12 +9,19 @@
 #include "gfx3d.h"
 #include "teapot.h"
 
-vec3 *model_vertices, *transformed_vertices;
+vec3 *model_vertices;
 const struct aiMesh *teapot;
 unsigned int vertex_count;
 unsigned int face_count;
 
 double zbuffer[192*192];
+
+typedef struct vertex_attrs {
+    vec3 position;
+    uint32_t colour;
+} vertex_attrs;
+
+vertex_attrs *transformed_vertices;
 
 void teapot_init(void) {
     // Start the import on the given file with some example postprocessing
@@ -43,7 +50,7 @@ void teapot_init(void) {
             model_vertices[i].z = v.z;
         }
 
-        transformed_vertices = malloc(vertex_count * sizeof(vec3));
+        transformed_vertices = malloc(vertex_count * sizeof(vertex_attrs));
         if (transformed_vertices == NULL) {
             printf("could not allocate transformed_vertices\n");
         }
@@ -51,6 +58,7 @@ void teapot_init(void) {
         printf("obj import failed: %s\n", aiGetErrorString());
     }
 }
+
 
 void teapot_frame(uint32_t *pixels, uint32_t time) {
     mat4 rotate_matrix;
@@ -67,7 +75,8 @@ void teapot_frame(uint32_t *pixels, uint32_t time) {
 
     for (unsigned int i = 0; i < vertex_count; i++) {
         vec3 pos = mat4_mul_vec3(model_vertices[i], rotate_matrix);
-        transformed_vertices[i] = pos; // mat4_mul_vec3(pos, projection_matrix);
+        transformed_vertices[i].position = pos; // mat4_mul_vec3(pos, projection_matrix);
+        transformed_vertices[i].colour = ((uint32_t)((4 - pos.z) * 32)) * 0x01010100;
     }
 
     for (double *zbuffer_ptr = zbuffer; zbuffer_ptr < (zbuffer + 192*192); zbuffer_ptr++) {
@@ -76,16 +85,20 @@ void teapot_frame(uint32_t *pixels, uint32_t time) {
 
     for (unsigned int i = 0; i < face_count; i++) {
         struct aiFace face = teapot->mFaces[i];
-        vec3 v0 = transformed_vertices[face.mIndices[0]];
-        vec3 v1 = transformed_vertices[face.mIndices[1]];
-        vec3 v2 = transformed_vertices[face.mIndices[2]];
+        vertex_attrs va0 = transformed_vertices[face.mIndices[0]];
+        vertex_attrs va1 = transformed_vertices[face.mIndices[1]];
+        vertex_attrs va2 = transformed_vertices[face.mIndices[2]];
+
+        vec3 v0 = va0.position;
+        vec3 v1 = va1.position;
+        vec3 v2 = va2.position;
 
         vec3 sv1 = {v0.x/5, v0.y/5, v0.z};
         vec3 sv2 = {v1.x/5, v1.y/5, v1.z};
         vec3 sv3 = {v2.x/5, v2.y/5, v2.z};
         gfx3d_flat_tri(
             pixels, zbuffer, sv1, sv2, sv3,
-            (128 + (i & 127)) * 0x01010100
+            va0.colour
         );
     }
 }
