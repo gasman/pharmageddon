@@ -139,7 +139,7 @@ void mat4_translate(mat4 mat, vec3 vec) {
     mat[11] += vec.z;
 }
 
-void mat4_to_inverse_mat3(mat4 mat, mat3 dest) {
+void mat4_to_inverse_transpose_mat3(mat4 mat, mat3 dest) {
     /*
         Calculates the inverse of the upper 3x3 elements of a mat4 and copies the result into a mat3
         The resulting matrix is useful for calculating transformed normals
@@ -165,13 +165,13 @@ void mat4_to_inverse_mat3(mat4 mat, mat3 dest) {
     double id = 1.0 / d;
 
     dest[0] = b01 * id;
-    dest[1] = (-a22 * a01 + a02 * a21) * id;
-    dest[2] = (a12 * a01 - a02 * a11) * id;
-    dest[3] = b11 * id;
+    dest[3] = (-a22 * a01 + a02 * a21) * id;
+    dest[6] = (a12 * a01 - a02 * a11) * id;
+    dest[1] = b11 * id;
     dest[4] = (a22 * a00 - a02 * a20) * id;
-    dest[5] = (-a12 * a00 + a02 * a10) * id;
-    dest[6] = b21 * id;
-    dest[7] = (-a21 * a00 + a01 * a20) * id;
+    dest[7] = (-a12 * a00 + a02 * a10) * id;
+    dest[2] = b21 * id;
+    dest[5] = (-a21 * a00 + a01 * a20) * id;
     dest[8] = (a11 * a00 - a01 * a10) * id;
 }
 
