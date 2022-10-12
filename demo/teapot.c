@@ -78,24 +78,30 @@ void teapot_frame(uint32_t *pixels, uint32_t time) {
     gfx_cls(pixels, 0x00110000);
 
     mat4_identity(rotate_matrix);
-    vec3 trans1 = {0, -1, 1};
+    vec3 trans1 = {0, -1, 5};
     mat4_translate(rotate_matrix, trans1);
     mat4_rotate_y(rotate_matrix, ((double)time) / 1000);
     mat4_rotate_x(rotate_matrix, ((double)time) / 900);
     // mat4_ortho( projection_matrix, -5.0, 5.0, 5.0, -5.0, -30.0, 100.0 );
-    mat4_to_inverse_mat3(rotate_matrix, normal_rotate_matrix);
+    vec3 trans2 = {0, 0, 10};
+    mat4_translate(rotate_matrix, trans2);
+    mat4_to_inverse_transpose_mat3(rotate_matrix, normal_rotate_matrix);
 
-    vec3 light_pos = {0, 5, 0};
+    vec3 light_pos = {0, 10, -2};
 
     for (unsigned int i = 0; i < vertex_count; i++) {
         vec3 pos = mat4_mul_vec3(model_vertices[i].position, rotate_matrix);
         vec3 normal = mat3_mul_vec3(model_vertices[i].normal, normal_rotate_matrix);
+        // vec3 normal = model_vertices[i].normal;
         vec3 light_dir = {light_pos.x - pos.x, light_pos.y - pos.y, light_pos.z - pos.z};
         light_dir = vec3_normalize(light_dir);
         double diffuse = vec3_dot(normal, light_dir);
         if (diffuse < 0) diffuse = 0;
 
-        transformed_vertices[i].position = pos; // mat4_mul_vec3(pos, projection_matrix);
+        // hacky perspective transform
+        vec3 projected_pos = {pos.x/pos.z, pos.y/pos.z, pos.z};
+        transformed_vertices[i].position = projected_pos;
+
         transformed_vertices[i].colour = ((uint32_t)(diffuse * 200)) * 0x01010100;
     }
 
@@ -113,11 +119,8 @@ void teapot_frame(uint32_t *pixels, uint32_t time) {
         vec3 v1 = va1.position;
         vec3 v2 = va2.position;
 
-        vec3 sv1 = {v0.x/5, v0.y/5, v0.z};
-        vec3 sv2 = {v1.x/5, v1.y/5, v1.z};
-        vec3 sv3 = {v2.x/5, v2.y/5, v2.z};
         gfx3d_flat_tri(
-            pixels, zbuffer, sv1, sv2, sv3,
+            pixels, zbuffer, v0, v1, v2,
             va0.colour
         );
     }
