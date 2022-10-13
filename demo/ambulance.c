@@ -7,7 +7,7 @@
 #include <assimp/postprocess.h>    // Post processing flags
 #include "gfx.h"
 #include "gfx3d.h"
-#include "teapot.h"
+#include "ambulance.h"
 
 typedef struct vertex_in_attrs {
     vec3 position;
@@ -19,7 +19,7 @@ typedef struct vertex_out_attrs {
     double brightness;
 } vertex_out_attrs;
 
-const struct aiMesh *teapot;
+const struct aiMesh *ambulance;
 unsigned int vertex_count;
 unsigned int face_count;
 
@@ -28,11 +28,11 @@ double zbuffer[192*192];
 vertex_in_attrs *model_vertices;
 vertex_out_attrs *transformed_vertices;
 
-void teapot_init(void) {
+void ambulance_init(void) {
     // Start the import on the given file with some example postprocessing
     // Usually - if speed is not the most important aspect for you - you'll t
     // probably to request more postprocessing than we do in this example.
-    const struct aiScene* scene = aiImportFile( "../assets/teapot.obj",
+    const struct aiScene* scene = aiImportFile( "../assets/ambulance.fbx",
         aiProcess_CalcTangentSpace       |
         aiProcess_Triangulate            |
         aiProcess_JoinIdenticalVertices  |
@@ -40,9 +40,9 @@ void teapot_init(void) {
         aiProcess_SortByPType);
 
     if (scene != NULL) {
-        teapot = scene->mMeshes[0];
-        vertex_count = teapot->mNumVertices;
-        face_count = teapot->mNumFaces;
+        ambulance = scene->mMeshes[0];
+        vertex_count = ambulance->mNumVertices;
+        face_count = ambulance->mNumFaces;
 
         model_vertices = malloc(vertex_count * sizeof(vertex_in_attrs));
         if (model_vertices == NULL) {
@@ -50,11 +50,11 @@ void teapot_init(void) {
         }
 
         for (unsigned int i = 0; i < vertex_count; i++) {
-            struct aiVector3D v = teapot->mVertices[i];
+            struct aiVector3D v = ambulance->mVertices[i];
             model_vertices[i].position.x = v.x;
             model_vertices[i].position.y = v.y;
             model_vertices[i].position.z = v.z;
-            struct aiVector3D n = teapot->mNormals[i];
+            struct aiVector3D n = ambulance->mNormals[i];
             model_vertices[i].normal.x = n.x;
             model_vertices[i].normal.y = n.y;
             model_vertices[i].normal.z = n.z;
@@ -234,7 +234,7 @@ static void gfx3d_gouraud_tri(uint32_t *pixels, double *zbuffer, vertex_out_attr
 }
 
 
-void teapot_frame(uint32_t *pixels, uint32_t time) {
+void ambulance_frame(uint32_t *pixels, uint32_t time) {
     mat4 rotate_matrix;
     mat3 normal_rotate_matrix;
     // mat4 projection_matrix;
@@ -242,12 +242,12 @@ void teapot_frame(uint32_t *pixels, uint32_t time) {
     gfx_cls(pixels, 0x00110000);
 
     mat4_identity(rotate_matrix);
-    vec3 trans1 = {0, -1, 5};
+    vec3 trans1 = {0, -2, 1};
     mat4_translate(rotate_matrix, trans1);
     mat4_rotate_y(rotate_matrix, ((double)time) / 1000);
-    mat4_rotate_x(rotate_matrix, ((double)time) / 900);
+    // mat4_rotate_x(rotate_matrix, ((double)time) / 900);
     // mat4_ortho( projection_matrix, -5.0, 5.0, 5.0, -5.0, -30.0, 100.0 );
-    vec3 trans2 = {0, 0, 10};
+    vec3 trans2 = {0, 0, 7};
     mat4_translate(rotate_matrix, trans2);
     mat4_to_inverse_transpose_mat3(rotate_matrix, normal_rotate_matrix);
 
@@ -255,7 +255,7 @@ void teapot_frame(uint32_t *pixels, uint32_t time) {
 
     for (unsigned int i = 0; i < vertex_count; i++) {
         vec3 pos = mat4_mul_vec3(model_vertices[i].position, rotate_matrix);
-        vec3 normal = mat3_mul_vec3(model_vertices[i].normal, normal_rotate_matrix);
+        vec3 normal = mat3_mul_vec3(vec3_normalize(model_vertices[i].normal), normal_rotate_matrix);
         // vec3 normal = model_vertices[i].normal;
         vec3 light_dir = {light_pos.x - pos.x, light_pos.y - pos.y, light_pos.z - pos.z};
         light_dir = vec3_normalize(light_dir);
@@ -274,7 +274,7 @@ void teapot_frame(uint32_t *pixels, uint32_t time) {
     }
 
     for (unsigned int i = 0; i < face_count; i++) {
-        struct aiFace face = teapot->mFaces[i];
+        struct aiFace face = ambulance->mFaces[i];
         vertex_out_attrs va0 = transformed_vertices[face.mIndices[0]];
         vertex_out_attrs va1 = transformed_vertices[face.mIndices[1]];
         vertex_out_attrs va2 = transformed_vertices[face.mIndices[2]];

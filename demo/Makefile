@@ -1,5 +1,5 @@
 CFLAGS=-Wall -O3 -g -Wextra -Wno-unused-parameter
-OBJS = demo.o gfx.o plasma.o boxes.o rotozoom.o crosstunnel.o credits.o teapot.o planes.o boards.o video.o gfx3d.o
+OBJS = demo.o gfx.o plasma.o boxes.o rotozoom.o crosstunnel.o credits.o ambulance.o planes.o boards.o video.o gfx3d.o
 
 all: demo.a
 
