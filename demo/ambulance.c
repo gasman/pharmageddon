@@ -14,8 +14,6 @@ const struct aiMesh *mesh;
 
 double zbuffer[192*192];
 
-gfx_image ambulance_texture;
-
 typedef struct gfx3d_face {
     unsigned int index1;
     unsigned int index2;
@@ -29,12 +27,14 @@ typedef struct gfx3d_model {
 
     unsigned int face_count;
     gfx3d_face *faces;
+
+    gfx_image texture;
 } gfx3d_model;
 
 gfx3d_model ambulance;
 
 void ambulance_init(void) {
-    gfx_loadimage("../assets/patarty_raccoon_texture.png", &ambulance_texture);
+    gfx_loadimage("../assets/patarty_raccoon_texture.png", &ambulance.texture);
 
     // Start the import on the given file with some example postprocessing
     // Usually - if speed is not the most important aspect for you - you'll t
@@ -69,8 +69,8 @@ void ambulance_init(void) {
             ambulance.vertices[i].normal.z = n.z;
             if (texture_coords != NULL) {
                 struct aiVector3D t = texture_coords[i];
-                ambulance.vertices[i].u = (int)(t.x * ambulance_texture.width);
-                ambulance.vertices[i].v = (int)(t.y * ambulance_texture.height);
+                ambulance.vertices[i].u = (int)(t.x * ambulance.texture.width);
+                ambulance.vertices[i].v = (int)(t.y * ambulance.texture.height);
             }
         }
 
@@ -144,7 +144,7 @@ void ambulance_frame(uint32_t *pixels, uint32_t time) {
         vertex_out_attrs va2 = ambulance.transformed_vertices[face.index3];
 
         gfx3d_gouraud_tex_tri(
-            pixels, zbuffer, &ambulance_texture, va0, va1, va2
+            pixels, zbuffer, &ambulance.texture, va0, va1, va2
         );
     }
 }
