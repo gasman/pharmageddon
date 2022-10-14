@@ -1,3 +1,6 @@
+#ifndef GFX_H
+#define GFX_H
+
 #include <stdint.h>
 
 void gfx_cls(uint32_t *pixels, uint32_t colour);
@@ -20,3 +23,5 @@ typedef struct gfx_image {
 void gfx_loadimage(char *filename, gfx_image *image);
 void gfx_drawimage(uint32_t *pixels, gfx_image *image, int x, int y);
 void gfx_rotateimage(uint32_t *pixels, gfx_image *image, double cx, double cy, double r, double s);
+
+#endif /* GFX_H */
