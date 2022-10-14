@@ -4,6 +4,11 @@
 #define HEIGHT 192
 
 #include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <assimp/cimport.h>        // Plain-C interface
+#include <assimp/scene.h>          // Output data structure
+#include <assimp/postprocess.h>    // Post processing flags
 
 void mat4_identity(mat4 out) {
     out[0] = 1;
@@ -185,6 +190,72 @@ double vec3_dot(vec3 v1, vec3 v2) {
     return v1.x*v2.x + v1.y*v2.y + v1.z*v2.z;
 }
 
+void gfx3d_load_model(char *model_filename, char *texture_filename, gfx3d_model *model) {
+    const struct aiMesh *mesh;
+
+    int has_texture = 0;
+    if (texture_filename != NULL) {
+        has_texture = 1;
+        gfx_loadimage(texture_filename, &model->texture);
+    }
+
+    // Start the import on the given file with some example postprocessing
+    // Usually - if speed is not the most important aspect for you - you'll t
+    // probably to request more postprocessing than we do in this example.
+    const struct aiScene* scene = aiImportFile(model_filename,
+        aiProcess_CalcTangentSpace       |
+        aiProcess_Triangulate            |
+        aiProcess_JoinIdenticalVertices  |
+        aiProcess_GenSmoothNormals       |
+        aiProcess_SortByPType);
+
+    if (scene != NULL) {
+        mesh = scene->mMeshes[0];
+        model->vertex_count = mesh->mNumVertices;
+        model->face_count = mesh->mNumFaces;
+
+        model->vertices = malloc(model->vertex_count * sizeof(vertex_in_attrs));
+        if (model->vertices == NULL) {
+            printf("could not allocate vertices\n");
+        }
+
+        struct aiVector3D *texture_coords = mesh->mTextureCoords[0];
+
+        for (unsigned int i = 0; i < model->vertex_count; i++) {
+            struct aiVector3D v = mesh->mVertices[i];
+            model->vertices[i].position.x = v.x;
+            model->vertices[i].position.y = v.y;
+            model->vertices[i].position.z = v.z;
+            struct aiVector3D n = mesh->mNormals[i];
+            model->vertices[i].normal.x = n.x;
+            model->vertices[i].normal.y = n.y;
+            model->vertices[i].normal.z = n.z;
+            if (has_texture && texture_coords != NULL) {
+                struct aiVector3D t = texture_coords[i];
+                model->vertices[i].u = (int)(t.x * model->texture.width);
+                model->vertices[i].v = (int)(t.y * model->texture.height);
+            }
+        }
+
+        model->transformed_vertices = malloc(model->vertex_count * sizeof(vertex_out_attrs));
+        if (model->transformed_vertices == NULL) {
+            printf("could not allocate transformed_vertices\n");
+        }
+
+        model->faces = malloc(model->face_count * sizeof(gfx3d_face));
+        if (model->faces == NULL) {
+            printf("could not allocate faces\n");
+        }
+        for (unsigned int i = 0; i < model->face_count; i++) {
+            struct aiFace face = mesh->mFaces[i];
+            model->faces[i].index1 = face.mIndices[0];
+            model->faces[i].index2 = face.mIndices[1];
+            model->faces[i].index3 = face.mIndices[2];
+        }
+    } else {
+        printf("obj import failed: %s\n", aiGetErrorString());
+    }
+}
 
 static void blitfill(uint32_t *pixels, double *zbuffer, int offset, int len, double z1, double z2, uint32_t colour) {
     uint32_t *pixels_pos = pixels + offset;

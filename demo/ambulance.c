@@ -2,99 +2,17 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <assimp/cimport.h>        // Plain-C interface
-#include <assimp/scene.h>          // Output data structure
-#include <assimp/postprocess.h>    // Post processing flags
 #include "gfx.h"
 #include "gfx3d.h"
 #include "ambulance.h"
 
-
-const struct aiMesh *mesh;
-
 double zbuffer[192*192];
-
-typedef struct gfx3d_face {
-    unsigned int index1;
-    unsigned int index2;
-    unsigned int index3;
-} gfx3d_face;
-
-typedef struct gfx3d_model {
-    unsigned int vertex_count;
-    vertex_in_attrs *vertices;
-    vertex_out_attrs *transformed_vertices;
-
-    unsigned int face_count;
-    gfx3d_face *faces;
-
-    gfx_image texture;
-} gfx3d_model;
 
 gfx3d_model ambulance;
 
 void ambulance_init(void) {
-    gfx_loadimage("../assets/patarty_raccoon_texture.png", &ambulance.texture);
-
-    // Start the import on the given file with some example postprocessing
-    // Usually - if speed is not the most important aspect for you - you'll t
-    // probably to request more postprocessing than we do in this example.
-    const struct aiScene* scene = aiImportFile( "../assets/patarty_raccoon.fbx",
-        aiProcess_CalcTangentSpace       |
-        aiProcess_Triangulate            |
-        aiProcess_JoinIdenticalVertices  |
-        aiProcess_GenSmoothNormals       |
-        aiProcess_SortByPType);
-
-    if (scene != NULL) {
-        mesh = scene->mMeshes[0];
-        ambulance.vertex_count = mesh->mNumVertices;
-        ambulance.face_count = mesh->mNumFaces;
-
-        ambulance.vertices = malloc(ambulance.vertex_count * sizeof(vertex_in_attrs));
-        if (ambulance.vertices == NULL) {
-            printf("could not allocate vertices\n");
-        }
-
-        struct aiVector3D *texture_coords = mesh->mTextureCoords[0];
-
-        for (unsigned int i = 0; i < ambulance.vertex_count; i++) {
-            struct aiVector3D v = mesh->mVertices[i];
-            ambulance.vertices[i].position.x = v.x;
-            ambulance.vertices[i].position.y = v.y;
-            ambulance.vertices[i].position.z = v.z;
-            struct aiVector3D n = mesh->mNormals[i];
-            ambulance.vertices[i].normal.x = n.x;
-            ambulance.vertices[i].normal.y = n.y;
-            ambulance.vertices[i].normal.z = n.z;
-            if (texture_coords != NULL) {
-                struct aiVector3D t = texture_coords[i];
-                ambulance.vertices[i].u = (int)(t.x * ambulance.texture.width);
-                ambulance.vertices[i].v = (int)(t.y * ambulance.texture.height);
-            }
-        }
-
-        ambulance.transformed_vertices = malloc(ambulance.vertex_count * sizeof(vertex_out_attrs));
-        if (ambulance.transformed_vertices == NULL) {
-            printf("could not allocate transformed_vertices\n");
-        }
-
-        ambulance.faces = malloc(ambulance.face_count * sizeof(gfx3d_face));
-        if (ambulance.faces == NULL) {
-            printf("could not allocate faces\n");
-        }
-        for (unsigned int i = 0; i < ambulance.face_count; i++) {
-            struct aiFace face = mesh->mFaces[i];
-            ambulance.faces[i].index1 = face.mIndices[0];
-            ambulance.faces[i].index2 = face.mIndices[1];
-            ambulance.faces[i].index3 = face.mIndices[2];
-        }
-    } else {
-        printf("obj import failed: %s\n", aiGetErrorString());
-    }
+    gfx3d_load_model("../assets/patarty_raccoon.fbx", "../assets/patarty_raccoon_texture.png", &ambulance);
 }
-
-
 
 void ambulance_frame(uint32_t *pixels, uint32_t time) {
     mat4 rotate_matrix;
