@@ -64,5 +64,8 @@ void ambulance_frame(uint32_t *pixels, uint32_t time) {
         gfx3d_gouraud_tex_tri(
             pixels, zbuffer, &ambulance.texture, va0, va1, va2
         );
+        /* gfx3d_gouraud_tri(
+            pixels, zbuffer, va0, va1, va2
+        ); */
     }
 }

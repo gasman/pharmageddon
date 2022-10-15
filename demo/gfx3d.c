@@ -233,7 +233,7 @@ void gfx3d_load_model(char *model_filename, char *texture_filename, gfx3d_model 
             if (has_texture && texture_coords != NULL) {
                 struct aiVector3D t = texture_coords[i];
                 model->vertices[i].u = (int)(t.x * model->texture.width);
-                model->vertices[i].v = (int)(t.y * model->texture.height);
+                model->vertices[i].v = (int)((1 - t.y) * model->texture.height);
             }
         }
 
@@ -702,8 +702,8 @@ void gfx3d_gouraud_tex_tri(uint32_t *pixels, double *zbuffer, gfx_image *texture
     dx1 = x1 << 16; dx2 = dx1;
     dz1 = va1.position.z; dz2 = va1.position.z;
     db1 = va1.brightness; db2 = va1.brightness;
-    du1 = va1.u; du2 = va1.u;
-    dv1 = va1.v; dv2 = va1.v;
+    du1 = va1.u << 16; du2 = du1;
+    dv1 = va1.v << 16; dv2 = dv1;
     py = y1 * 192;
 
     // Long edge on the left
