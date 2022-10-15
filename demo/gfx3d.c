@@ -586,10 +586,12 @@ static void blitfill_tex(uint32_t *pixels, double *zbuffer, gfx_image *texture, 
     for (int i = 0; i < len; i++) {
         if (z < *zbuffer_pos) {
             unsigned char *texel = texture->data + ((v>>16)*texture->width + (u>>16)) * 4;
+            int bright_int = (int)(bright * 255);
+            if (bright_int > 255) bright_int = 255;
             *pixels_pos = (
-                (texel[0] << 24)
-                | (texel[1] << 16)
-                | (texel[2] << 8)
+                ((texel[0] * bright_int & 0xff00) << 16)
+                | ((texel[1] * bright_int & 0xff00) << 8)
+                | (texel[2] * bright_int & 0xff00)
             );
             *zbuffer_pos = z;
         }
