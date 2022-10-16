@@ -20,7 +20,7 @@ void ambulance_init(void) {
     // Start the import on the given file with some example postprocessing
     // Usually - if speed is not the most important aspect for you - you'll t
     // probably to request more postprocessing than we do in this example.
-    const struct aiScene* scene = aiImportFile("../assets/ambulance_3.fbx",
+    const struct aiScene* scene = aiImportFile("../assets/ambulance.fbx",
         aiProcess_CalcTangentSpace       |
         aiProcess_Triangulate            |
         aiProcess_JoinIdenticalVertices  |
@@ -29,7 +29,6 @@ void ambulance_init(void) {
         aiProcess_SortByPType);
 
     if (scene != NULL) {
-        printf("mesh count: %d\n", scene->mNumMeshes);
         gfx3d_read_mesh(scene, 0, &ambulance);
         gfx3d_read_mesh(scene, 1, &ambulance_bits[0]);
         gfx3d_read_mesh(scene, 2, &ambulance_bits[1]);
@@ -61,8 +60,16 @@ void ambulance_frame(uint32_t *pixels, uint32_t time) {
     vec3 light_pos = {0, 10, -2};
 
     gfx3d_gouraud_tex_mesh(pixels, zbuffer, ambulance, rotate_matrix, normal_rotate_matrix, light_pos);
-    gfx3d_gouraud_mesh(pixels, zbuffer, ambulance_bits[0], rotate_matrix, normal_rotate_matrix, light_pos);
-    gfx3d_gouraud_mesh(pixels, zbuffer, ambulance_bits[1], rotate_matrix, normal_rotate_matrix, light_pos);
-    gfx3d_gouraud_mesh(pixels, zbuffer, ambulance_bits[2], rotate_matrix, normal_rotate_matrix, light_pos);
-    gfx3d_gouraud_mesh(pixels, zbuffer, ambulance_bits[3], rotate_matrix, normal_rotate_matrix, light_pos);
+
+    // tyres/steering wheel - dark grey
+    gfx3d_gouraud_mesh(pixels, zbuffer, ambulance_bits[0], rotate_matrix, normal_rotate_matrix, light_pos, 0x40404000);
+
+    // wheels/cab - mid grey
+    gfx3d_gouraud_mesh(pixels, zbuffer, ambulance_bits[1], rotate_matrix, normal_rotate_matrix, light_pos, 0x80808000);
+
+    // axles/window inner - light grey
+    gfx3d_gouraud_mesh(pixels, zbuffer, ambulance_bits[2], rotate_matrix, normal_rotate_matrix, light_pos, 0xc0c0c000);
+
+    // seats - green
+    gfx3d_gouraud_mesh(pixels, zbuffer, ambulance_bits[3], rotate_matrix, normal_rotate_matrix, light_pos, 0x00800000);
 }

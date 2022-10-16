@@ -230,7 +230,7 @@ void gfx3d_flat_tri(uint32_t *pixels, double *zbuffer, vec3 v1, vec3 v2, vec3 v3
     }
 }
 
-static void blitfill_gouraud(uint32_t *pixels, double *zbuffer, int offset, int len, double z1, double z2, double bright1, double bright2) {
+static void blitfill_gouraud(uint32_t *pixels, double *zbuffer, int offset, int len, double z1, double z2, double bright1, double bright2, uint32_t colour) {
     uint32_t *pixels_pos = pixels + offset;
     double *zbuffer_pos = zbuffer + offset;
     double z = z1;
@@ -241,7 +241,13 @@ static void blitfill_gouraud(uint32_t *pixels, double *zbuffer, int offset, int 
 
     for (int i = 0; i < len; i++) {
         if (z < *zbuffer_pos) {
-            *pixels_pos = (uint32_t)(bright * 200) * 0x01010100;
+            int br_int = (int)(bright * 255);
+            if (br_int > 255) br_int = 255;
+            *pixels_pos = (
+                (((colour & 0xff000000) >> 8) * br_int & 0xff000000)
+                | (((colour & 0xff0000) >> 8) * br_int & 0xff0000)
+                | (((colour & 0xff00) >> 8) * br_int & 0xff00)
+            );
             *zbuffer_pos = z;
         }
         pixels_pos++;
@@ -251,7 +257,7 @@ static void blitfill_gouraud(uint32_t *pixels, double *zbuffer, int offset, int 
     }
 }
 
-void gfx3d_gouraud_tri(uint32_t *pixels, double *zbuffer, vertex_out_attrs va1, vertex_out_attrs va2, vertex_out_attrs va3) {
+void gfx3d_gouraud_tri(uint32_t *pixels, double *zbuffer, vertex_out_attrs va1, vertex_out_attrs va2, vertex_out_attrs va3, uint32_t colour) {
     vec3 v1 = va1.position;
     vec3 v2 = va2.position;
     vec3 v3 = va3.position;
@@ -345,7 +351,7 @@ void gfx3d_gouraud_tri(uint32_t *pixels, double *zbuffer, vertex_out_attrs va1, 
                 if (startx < 0) startx = 0;
                 if (endx > 192 - 1) endx = 192 - 1;
                 if ((endx - startx + 1) > 0) {
-                    blitfill_gouraud(pixels, zbuffer, startx + py, endx - startx + 1, dz1, dz2, db1, db2);
+                    blitfill_gouraud(pixels, zbuffer, startx + py, endx - startx + 1, dz1, dz2, db1, db2, colour);
                 }
             }
             dx1 += xstep1;
@@ -372,7 +378,7 @@ void gfx3d_gouraud_tri(uint32_t *pixels, double *zbuffer, vertex_out_attrs va1, 
                 if (startx < 0) startx = 0;
                 if (endx > 192 - 1) endx = 192 - 1;
                 if ((endx - startx + 1) > 0) {
-                    blitfill_gouraud(pixels, zbuffer, startx + py, endx - startx + 1, dz1, dz2, db1, db2);
+                    blitfill_gouraud(pixels, zbuffer, startx + py, endx - startx + 1, dz1, dz2, db1, db2, colour);
                 }
             }
             dx2 += xstep1;
@@ -641,7 +647,7 @@ void gfx3d_gouraud_tex_mesh(uint32_t *pixels, double *zbuffer, gfx3d_model mesh,
     }
 }
 
-void gfx3d_gouraud_mesh(uint32_t *pixels, double *zbuffer, gfx3d_model mesh, mat4 rotate_matrix, mat3 normal_rotate_matrix, vec3 light_pos) {
+void gfx3d_gouraud_mesh(uint32_t *pixels, double *zbuffer, gfx3d_model mesh, mat4 rotate_matrix, mat3 normal_rotate_matrix, vec3 light_pos, uint32_t colour) {
     gfx3d_transform_vertices(mesh, rotate_matrix, normal_rotate_matrix, light_pos);
 
     for (unsigned int i = 0; i < mesh.face_count; i++) {
@@ -651,7 +657,7 @@ void gfx3d_gouraud_mesh(uint32_t *pixels, double *zbuffer, gfx3d_model mesh, mat
         vertex_out_attrs va2 = mesh.transformed_vertices[face.index3];
 
         gfx3d_gouraud_tri(
-            pixels, zbuffer, va0, va1, va2
+            pixels, zbuffer, va0, va1, va2, colour
         );
     }
 }
