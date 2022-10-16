@@ -4,6 +4,7 @@
 #include "boards.h"
 #include "video.h"
 #include "scroller.h"
+#include "title.h"
 
 void demo_init(void) {
     credits_init();
@@ -12,10 +13,11 @@ void demo_init(void) {
     boards_init();
     video_init();
     scroller_init();
+    title_init();
 }
 
 void demo_frame(uint32_t *pixels, uint32_t time) {
-    ambulance_frame(pixels, time);
+    title_frame(pixels, time);
     /*
     uint32_t scene = (time / 5486) % 6;
     switch (scene) {
