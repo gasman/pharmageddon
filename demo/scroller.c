@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
 #include "gfx.h"
 #include "scroller.h"
 #include "stb_image.h"
@@ -68,8 +69,16 @@ void scroller_init(void) {
 void scroller_frame(uint32_t *pixels, uint32_t time) {
     unsigned char *text_ptr = text + font_height * (time/20);
 
+    gfx_cls(pixels, 0x00110000);
+
     for (int x = 0; x < 192; x++) {
-        uint32_t *screen_ptr = pixels + 192 * (96 - font_height / 2) + x;
+        int y_top = (
+            (96 - font_height / 2)
+            + (int)(8 * sin(
+                ((double)x / 20) - ((double)time / 200)
+            ))
+        );
+        uint32_t *screen_ptr = pixels + 192 * y_top + x;
         for (int y = 0; y < font_height; y++) {
             *screen_ptr = 0x00010000 * (*text_ptr);
             text_ptr++;
