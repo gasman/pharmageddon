@@ -2,6 +2,9 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <assimp/cimport.h>        // Plain-C interface
+#include <assimp/scene.h>          // Output data structure
+#include <assimp/postprocess.h>    // Post processing flags
 #include "gfx.h"
 #include "gfx3d.h"
 #include "ambulance.h"
@@ -9,9 +12,31 @@
 double zbuffer[192*192];
 
 gfx3d_model ambulance;
+gfx3d_model ambulance_bits[4];
 
 void ambulance_init(void) {
-    gfx3d_load_model("../assets/patarty_raccoon.fbx", "../assets/patarty_raccoon_texture.png", &ambulance);
+    gfx_loadimage("../assets/ambulance_mat_2D_View.png", &ambulance.texture);
+
+    // Start the import on the given file with some example postprocessing
+    // Usually - if speed is not the most important aspect for you - you'll t
+    // probably to request more postprocessing than we do in this example.
+    const struct aiScene* scene = aiImportFile("../assets/ambulance_3.fbx",
+        aiProcess_CalcTangentSpace       |
+        aiProcess_Triangulate            |
+        aiProcess_JoinIdenticalVertices  |
+        aiProcess_GenSmoothNormals       |
+        aiProcess_SortByPType);
+
+    if (scene != NULL) {
+        printf("mesh count: %d\n", scene->mNumMeshes);
+        gfx3d_read_mesh(scene, 0, &ambulance);
+        gfx3d_read_mesh(scene, 1, &ambulance_bits[0]);
+        gfx3d_read_mesh(scene, 2, &ambulance_bits[1]);
+        gfx3d_read_mesh(scene, 3, &ambulance_bits[2]);
+        gfx3d_read_mesh(scene, 4, &ambulance_bits[3]);
+    } else {
+        printf("obj import failed: %s\n", aiGetErrorString());
+    }
 }
 
 void ambulance_frame(uint32_t *pixels, uint32_t time) {
@@ -35,4 +60,8 @@ void ambulance_frame(uint32_t *pixels, uint32_t time) {
     vec3 light_pos = {0, 10, -2};
 
     gfx3d_gouraud_tex_mesh(pixels, zbuffer, ambulance, rotate_matrix, normal_rotate_matrix, light_pos);
+    gfx3d_gouraud_mesh(pixels, zbuffer, ambulance_bits[0], rotate_matrix, normal_rotate_matrix, light_pos);
+    gfx3d_gouraud_mesh(pixels, zbuffer, ambulance_bits[1], rotate_matrix, normal_rotate_matrix, light_pos);
+    gfx3d_gouraud_mesh(pixels, zbuffer, ambulance_bits[2], rotate_matrix, normal_rotate_matrix, light_pos);
+    gfx3d_gouraud_mesh(pixels, zbuffer, ambulance_bits[3], rotate_matrix, normal_rotate_matrix, light_pos);
 }

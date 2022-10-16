@@ -37,7 +37,7 @@ void gfx3d_load_model(char *model_filename, char *texture_filename, gfx3d_model 
 void gfx3d_read_mesh(const struct aiScene *scene, int mesh_index, gfx3d_model *model) {
     const struct aiMesh *mesh;
 
-    mesh = scene->mMeshes[0];
+    mesh = scene->mMeshes[mesh_index];
     model->vertex_count = mesh->mNumVertices;
     model->face_count = mesh->mNumFaces;
 
