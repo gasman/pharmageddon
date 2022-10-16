@@ -11,8 +11,6 @@
 
 
 void gfx3d_load_model(char *model_filename, char *texture_filename, gfx3d_model *model) {
-    const struct aiMesh *mesh;
-
     int has_texture = 0;
     if (texture_filename != NULL) {
         has_texture = 1;
@@ -30,50 +28,56 @@ void gfx3d_load_model(char *model_filename, char *texture_filename, gfx3d_model 
         aiProcess_SortByPType);
 
     if (scene != NULL) {
-        mesh = scene->mMeshes[0];
-        model->vertex_count = mesh->mNumVertices;
-        model->face_count = mesh->mNumFaces;
-
-        model->vertices = malloc(model->vertex_count * sizeof(vertex_in_attrs));
-        if (model->vertices == NULL) {
-            printf("could not allocate vertices\n");
-        }
-
-        struct aiVector3D *texture_coords = mesh->mTextureCoords[0];
-
-        for (unsigned int i = 0; i < model->vertex_count; i++) {
-            struct aiVector3D v = mesh->mVertices[i];
-            model->vertices[i].position.x = v.x;
-            model->vertices[i].position.y = v.y;
-            model->vertices[i].position.z = v.z;
-            struct aiVector3D n = mesh->mNormals[i];
-            model->vertices[i].normal.x = n.x;
-            model->vertices[i].normal.y = n.y;
-            model->vertices[i].normal.z = n.z;
-            if (has_texture && texture_coords != NULL) {
-                struct aiVector3D t = texture_coords[i];
-                model->vertices[i].u = (int)(t.x * model->texture.width);
-                model->vertices[i].v = (int)((1 - t.y) * model->texture.height);
-            }
-        }
-
-        model->transformed_vertices = malloc(model->vertex_count * sizeof(vertex_out_attrs));
-        if (model->transformed_vertices == NULL) {
-            printf("could not allocate transformed_vertices\n");
-        }
-
-        model->faces = malloc(model->face_count * sizeof(gfx3d_face));
-        if (model->faces == NULL) {
-            printf("could not allocate faces\n");
-        }
-        for (unsigned int i = 0; i < model->face_count; i++) {
-            struct aiFace face = mesh->mFaces[i];
-            model->faces[i].index1 = face.mIndices[0];
-            model->faces[i].index2 = face.mIndices[1];
-            model->faces[i].index3 = face.mIndices[2];
-        }
+        gfx3d_read_mesh(scene, 0, model);
     } else {
         printf("obj import failed: %s\n", aiGetErrorString());
+    }
+}
+
+void gfx3d_read_mesh(const struct aiScene *scene, int mesh_index, gfx3d_model *model) {
+    const struct aiMesh *mesh;
+
+    mesh = scene->mMeshes[0];
+    model->vertex_count = mesh->mNumVertices;
+    model->face_count = mesh->mNumFaces;
+
+    model->vertices = malloc(model->vertex_count * sizeof(vertex_in_attrs));
+    if (model->vertices == NULL) {
+        printf("could not allocate vertices\n");
+    }
+
+    struct aiVector3D *texture_coords = mesh->mTextureCoords[0];
+
+    for (unsigned int i = 0; i < model->vertex_count; i++) {
+        struct aiVector3D v = mesh->mVertices[i];
+        model->vertices[i].position.x = v.x;
+        model->vertices[i].position.y = v.y;
+        model->vertices[i].position.z = v.z;
+        struct aiVector3D n = mesh->mNormals[i];
+        model->vertices[i].normal.x = n.x;
+        model->vertices[i].normal.y = n.y;
+        model->vertices[i].normal.z = n.z;
+        if (texture_coords != NULL) {
+            struct aiVector3D t = texture_coords[i];
+            model->vertices[i].u = (int)(t.x * model->texture.width);
+            model->vertices[i].v = (int)((1 - t.y) * model->texture.height);
+        }
+    }
+
+    model->transformed_vertices = malloc(model->vertex_count * sizeof(vertex_out_attrs));
+    if (model->transformed_vertices == NULL) {
+        printf("could not allocate transformed_vertices\n");
+    }
+
+    model->faces = malloc(model->face_count * sizeof(gfx3d_face));
+    if (model->faces == NULL) {
+        printf("could not allocate faces\n");
+    }
+    for (unsigned int i = 0; i < model->face_count; i++) {
+        struct aiFace face = mesh->mFaces[i];
+        model->faces[i].index1 = face.mIndices[0];
+        model->faces[i].index2 = face.mIndices[1];
+        model->faces[i].index3 = face.mIndices[2];
     }
 }
 
@@ -592,5 +596,62 @@ void gfx3d_gouraud_tex_tri(uint32_t *pixels, double *zbuffer, gfx_image *texture
             }
             py += 192;
         }
+    }
+}
+
+
+void gfx3d_clear_zbuffer(double *zbuffer) {
+    for (double *zbuffer_ptr = zbuffer; zbuffer_ptr < (zbuffer + 192*192); zbuffer_ptr++) {
+        *zbuffer_ptr = 100000;
+    }
+}
+
+void gfx3d_transform_vertices(gfx3d_model mesh, mat4 rotate_matrix, mat3 normal_rotate_matrix, vec3 light_pos) {
+    for (unsigned int i = 0; i < mesh.vertex_count; i++) {
+        vec3 pos = mat4_mul_vec3(mesh.vertices[i].position, rotate_matrix);
+        vec3 normal = mat3_mul_vec3(vec3_normalize(mesh.vertices[i].normal), normal_rotate_matrix);
+        // vec3 normal = mesh.vertices[i].normal;
+        vec3 light_dir = {light_pos.x - pos.x, light_pos.y - pos.y, light_pos.z - pos.z};
+        light_dir = vec3_normalize(light_dir);
+        double diffuse = vec3_dot(normal, light_dir);
+        if (diffuse < 0) diffuse = 0;
+
+        // hacky perspective transform
+        vec3 projected_pos = {pos.x/pos.z, pos.y/pos.z, pos.z};
+        mesh.transformed_vertices[i].position = projected_pos;
+
+        mesh.transformed_vertices[i].brightness = diffuse;
+        mesh.transformed_vertices[i].u = mesh.vertices[i].u;
+        mesh.transformed_vertices[i].v = mesh.vertices[i].v;
+    }
+}
+
+void gfx3d_gouraud_tex_mesh(uint32_t *pixels, double *zbuffer, gfx3d_model mesh, mat4 rotate_matrix, mat3 normal_rotate_matrix, vec3 light_pos) {
+    gfx3d_transform_vertices(mesh, rotate_matrix, normal_rotate_matrix, light_pos);
+
+    for (unsigned int i = 0; i < mesh.face_count; i++) {
+        gfx3d_face face = mesh.faces[i];
+        vertex_out_attrs va0 = mesh.transformed_vertices[face.index1];
+        vertex_out_attrs va1 = mesh.transformed_vertices[face.index2];
+        vertex_out_attrs va2 = mesh.transformed_vertices[face.index3];
+
+        gfx3d_gouraud_tex_tri(
+            pixels, zbuffer, &mesh.texture, va0, va1, va2
+        );
+    }
+}
+
+void gfx3d_gouraud_mesh(uint32_t *pixels, double *zbuffer, gfx3d_model mesh, mat4 rotate_matrix, mat3 normal_rotate_matrix, vec3 light_pos) {
+    gfx3d_transform_vertices(mesh, rotate_matrix, normal_rotate_matrix, light_pos);
+
+    for (unsigned int i = 0; i < mesh.face_count; i++) {
+        gfx3d_face face = mesh.faces[i];
+        vertex_out_attrs va0 = mesh.transformed_vertices[face.index1];
+        vertex_out_attrs va1 = mesh.transformed_vertices[face.index2];
+        vertex_out_attrs va2 = mesh.transformed_vertices[face.index3];
+
+        gfx3d_gouraud_tri(
+            pixels, zbuffer, va0, va1, va2
+        );
     }
 }
