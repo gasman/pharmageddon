@@ -5,6 +5,7 @@
 #include "video.h"
 #include "scroller.h"
 #include "title.h"
+#include "patarty.h"
 
 void demo_init(void) {
     credits_init();
@@ -14,26 +15,30 @@ void demo_init(void) {
     video_init();
     scroller_init();
     title_init();
+    patarty_init();
 }
 
 void demo_frame(uint32_t *pixels, uint32_t time) {
-    title_frame(pixels, time);
+    patarty_frame(pixels, time);
     /*
-    uint32_t scene = (time / 5486) % 6;
+    uint32_t scene = (time / 5486) % 7;
     switch (scene) {
         case 0:
             scroller_frame(pixels, time);
             break;
         case 1:
-            video_frame(pixels, time);
+            title_frame(pixels, time);
             break;
         case 2:
-            credits_frame(pixels, time);
+            video_frame(pixels, time);
             break;
         case 3:
-            ambulance_frame(pixels, time);
+            credits_frame(pixels, time);
             break;
         case 4:
+            ambulance_frame(pixels, time);
+            break;
+        case 5:
             planes_frame(pixels, time);
             break;
         default:
