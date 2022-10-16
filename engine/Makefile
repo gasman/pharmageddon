@@ -1,5 +1,5 @@
 CFLAGS=-Wall -O3 -g -Wextra -Wno-unused-parameter
-OBJS = gfx.o gfx3d.o
+OBJS = gfx.o gfx3d.o matrix.o
 
 all: engine.a
 
