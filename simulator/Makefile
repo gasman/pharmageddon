@@ -4,8 +4,9 @@
 CC := clang
 
 DEMO_DIR = ../demo
+ENGINE_DIR = ../engine
 
-CFLAGS := `sdl2-config --cflags` -ggdb3 -O0 --std=c99 -Wall -I $(DEMO_DIR)
+CFLAGS := `sdl2-config --cflags` -ggdb3 -O0 --std=c99 -Wall -I $(DEMO_DIR) -I $(ENGINE_DIR)
 LDFLAGS := `sdl2-config --libs` -lSDL2_mixer -lm -lassimp
 
 # add header files here
@@ -15,7 +16,7 @@ HDRS := $(DEMO_DIR)/demo.h
 SRCS := main.c
 
 # generate names of object files
-OBJS := $(SRCS:.c=.o) $(DEMO_DIR)/demo.a
+OBJS := $(SRCS:.c=.o) $(DEMO_DIR)/demo.a $(ENGINE_DIR)/engine.a
 
 # name of executable
 EXEC := pharma
@@ -25,6 +26,9 @@ all: $(EXEC)
 
 $(DEMO_DIR)/demo.a: FORCE
 	$(MAKE) -C $(DEMO_DIR)
+
+$(ENGINE_DIR)/engine.a: FORCE
+	$(MAKE) -C $(ENGINE_DIR)
 
 # recipe for building the final executable
 $(EXEC): $(OBJS) $(HDRS) Makefile

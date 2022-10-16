@@ -9,10 +9,11 @@ RGB_LIBRARY=$(RGB_LIBDIR)/lib$(RGB_LIBRARY_NAME).a
 LDFLAGS+=-L$(RGB_LIBDIR) -l$(RGB_LIBRARY_NAME) -lrt -lm -lpthread `sdl2-config --libs` -lSDL2_mixer -lassimp
 
 DEMO_DIR = ../demo
+ENGINE_DIR = ../engine
 
 CFLAGS=-Wall -O3 -g -Wextra -Wno-unused-parameter `sdl2-config --cflags`
 CXXFLAGS=$(CFLAGS)
-OBJECTS=pharma.o $(DEMO_DIR)/demo.a
+OBJECTS=pharma.o $(DEMO_DIR)/demo.a $(ENGINE_DIR)/engine.a
 BINARIES=pharma
 
 all : $(BINARIES)
@@ -32,8 +33,11 @@ pharma : $(OBJECTS) $(RGB_LIBRARY)
 $(DEMO_DIR)/demo.a: FORCE
 	$(MAKE) -C $(DEMO_DIR)
 
+$(ENGINE_DIR)/engine.a: FORCE
+	$(MAKE) -C $(ENGINE_DIR)
+
 %.o : %.c
-	$(CC) -I$(RGB_INCDIR) -I$(DEMO_DIR) $(CFLAGS) -c -o $@ $<
+	$(CC) -I$(RGB_INCDIR) -I$(DEMO_DIR) -I$(ENGINE_DIR) $(CFLAGS) -c -o $@ $<
 
 clean:
 	rm -f $(OBJECTS) $(BINARIES)

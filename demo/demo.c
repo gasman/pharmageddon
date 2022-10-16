@@ -1,6 +1,3 @@
-#include "plasma.h"
-#include "boxes.h"
-#include "rotozoom.h"
 #include "credits.h"
 #include "ambulance.h"
 #include "planes.h"
@@ -9,9 +6,6 @@
 #include "scroller.h"
 
 void demo_init(void) {
-    plasma_init();
-    rotozoom_init();
-    boxes_init();
     credits_init();
     ambulance_init();
     planes_init();
@@ -21,9 +15,7 @@ void demo_init(void) {
 }
 
 void demo_frame(uint32_t *pixels, uint32_t time) {
-    scroller_frame(pixels, time);
-    /*
-    uint32_t scene = (time / 5486) % 5;
+    uint32_t scene = (time / 5486) % 6;
     switch (scene) {
         case 0:
             scroller_frame(pixels, time);
@@ -43,5 +35,4 @@ void demo_frame(uint32_t *pixels, uint32_t time) {
         default:
             boards_frame(pixels, time);
     }
-    */
 }
