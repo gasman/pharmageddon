@@ -52,11 +52,11 @@ void gfx3d_read_mesh(const struct aiScene *scene, int mesh_index, gfx3d_model *m
         struct aiVector3D v = mesh->mVertices[i];
         model->vertices[i].position.x = v.x;
         model->vertices[i].position.y = v.y;
-        model->vertices[i].position.z = v.z;
+        model->vertices[i].position.z = -v.z;
         struct aiVector3D n = mesh->mNormals[i];
         model->vertices[i].normal.x = n.x;
         model->vertices[i].normal.y = n.y;
-        model->vertices[i].normal.z = n.z;
+        model->vertices[i].normal.z = -n.z;
         if (texture_coords != NULL) {
             struct aiVector3D t = texture_coords[i];
             model->vertices[i].u = (int)(t.x * model->texture.width);

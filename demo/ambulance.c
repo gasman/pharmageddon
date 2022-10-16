@@ -25,6 +25,7 @@ void ambulance_init(void) {
         aiProcess_Triangulate            |
         aiProcess_JoinIdenticalVertices  |
         aiProcess_GenSmoothNormals       |
+        aiProcess_FlipWindingOrder |
         aiProcess_SortByPType);
 
     if (scene != NULL) {
@@ -48,7 +49,7 @@ void ambulance_frame(uint32_t *pixels, uint32_t time) {
     gfx3d_clear_zbuffer(zbuffer);
 
     mat4_identity(rotate_matrix);
-    vec3 trans1 = {0, -2, 1};
+    vec3 trans1 = {0, -2, -3};
     mat4_translate(rotate_matrix, trans1);
     mat4_rotate_y(rotate_matrix, ((double)time) / 1000);
     // mat4_rotate_x(rotate_matrix, ((double)time) / 900);
