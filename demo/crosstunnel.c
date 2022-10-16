@@ -1,18 +1,12 @@
 #include <math.h>
-#include <stdio.h>
 #include "crosstunnel.h"
-#include "stdbool.h"
 #include "gfx.h"
-
-#define WIDTH 192
-#define HEIGHT 192
 
 #define CROSSCOUNT 8
 
 // parametric function for the x position on a cross. ranges from 0-1. used for drawing the rotating dots.
 double crossx(double t) {
-    double intpart;
-    t = modf(t,&intpart);
+    t = fmod(t, 1.0);
     if(t<(1/12.0)) {
         return t*4;
     } else if(t<(2/12.0)) {
@@ -40,8 +34,6 @@ double crossx(double t) {
     }
 }
 
-double crossScales[CROSSCOUNT];
-
 // parametric function for the y position on a cross. ranges from 0-1. used for drawing the rotating dots.
 double crossy(double t) {
     return crossx(t+9/12.0);
@@ -62,31 +54,20 @@ void plotCross(uint32_t *pixels, float x, float y, float h, float bpos, float bs
 }
 
 void crosstunnel_init() {
-    for(int i = 0; i<CROSSCOUNT; i++) {
-        crossScales[i] = -i*(192/8);
-    }
-
 }
 
 
 void crosstunnel_frame(uint32_t *pixels, uint32_t time) {
-    double intpart;
-
-    double t = time/5000.0;
-    double scale = (time%2700/1000.0)+1.0;
-    double pos = modf(t,&intpart);
+    double pos = fmod(((double)time)/5000.0, 1.0);
 
     gfx_cls(pixels, 0x00000000);
 
     for(int i=0;i<CROSSCOUNT;i++) {
+        double scale = fmod((-i*(192/8)) + ((double)time)/5, 192.0);
         if(i%2 == 1) {
-         plotCross(pixels,96,96,crossScales[i],pos,0.05,i*32<<16);
+         plotCross(pixels,96,96,scale,pos,0.05,i*32<<16);
         } else {
-         plotCross(pixels,96,96,crossScales[i],-pos+1,0.05,i*32<<16);
-        }
-        crossScales[i] += 0.5; // TODO replace with time-based solution
-        if(crossScales[i] > 192.0) {
-            crossScales[i] = (192/8);
+         plotCross(pixels,96,96,scale,-pos+1,0.05,i*32<<16);
         }
     }
 }
