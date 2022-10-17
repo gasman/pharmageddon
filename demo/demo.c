@@ -6,6 +6,7 @@
 #include "scroller.h"
 #include "title.h"
 #include "patarty.h"
+#include "jarig.h"
 
 void demo_init(void) {
     credits_init();
@@ -16,10 +17,11 @@ void demo_init(void) {
     scroller_init();
     title_init();
     patarty_init();
+    jarig_init();
 }
 
 void demo_frame(uint32_t *pixels, uint32_t time) {
-    patarty_frame(pixels, time);
+    jarig_frame(pixels, time);
     /*
     uint32_t scene = (time / 5486) % 7;
     switch (scene) {

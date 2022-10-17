@@ -1,5 +1,5 @@
 CFLAGS=-Wall -O3 -g -Wextra -Wno-unused-parameter
-OBJS = demo.o plasma.o patarty.o rotozoom.o credits.o ambulance.o planes.o boards.o video.o scroller.o title.o
+OBJS = demo.o plasma.o patarty.o rotozoom.o credits.o ambulance.o planes.o boards.o video.o scroller.o title.o jarig.o
 ENGINE_DIR = ../engine
 
 all: demo.a
