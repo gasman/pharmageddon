@@ -7,6 +7,7 @@
 #include "title.h"
 #include "patarty.h"
 #include "jarig.h"
+#include "physics.h"
 
 void demo_init(void) {
     credits_init();
@@ -18,10 +19,11 @@ void demo_init(void) {
     title_init();
     patarty_init();
     jarig_init();
+    physics_init();
 }
 
 void demo_frame(uint32_t *pixels, uint32_t time) {
-    jarig_frame(pixels, time);
+    physics_frame(pixels, time);
     /*
     uint32_t scene = (time / 5486) % 7;
     switch (scene) {
