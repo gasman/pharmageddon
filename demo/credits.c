@@ -8,18 +8,21 @@
 #define SPRITE_HEIGHT 64
 #define NAME_GAP 2000
 
-unsigned char *sprites[7];
+#define NAME_COUNT 8
+
+unsigned char *sprites[NAME_COUNT];
 
 void credits_init(void) {
     int w, h, n;
     /* load as greyscale bitmap */
     sprites[0] = stbi_load("../assets/gasman.png", &w, &h, &n, 1);
-    sprites[1] = stbi_load("../assets/nihilazo.png", &w, &h, &n, 1);
+    sprites[1] = stbi_load("../assets/nico.png", &w, &h, &n, 1);
     sprites[2] = stbi_load("../assets/superogue.png", &w, &h, &n, 1);
     sprites[3] = stbi_load("../assets/aldroid.png", &w, &h, &n, 1);
     sprites[4] = stbi_load("../assets/mantratronic.png", &w, &h, &n, 1);
     sprites[5] = stbi_load("../assets/raccoonviolet.png", &w, &h, &n, 1);
     sprites[6] = stbi_load("../assets/tobach.png", &w, &h, &n, 1);
+    sprites[7] = stbi_load("../assets/stormcaller.png", &w, &h, &n, 1);
 }
 
 
@@ -85,7 +88,7 @@ void draw_name(uint32_t *pixels, unsigned char *image, uint32_t time) {
 }
 
 void credits_frame(uint32_t *pixels, uint32_t time) {
-    int sprite_num = (time / NAME_GAP) % 7;
+    int sprite_num = (time / NAME_GAP) % NAME_COUNT;
     uint32_t ntime = time % NAME_GAP;
 
     double flash;
@@ -97,7 +100,7 @@ void credits_frame(uint32_t *pixels, uint32_t time) {
     gfx_cls(pixels, (int)(flash*255) << 16);
 
     if (time > 2000) {
-        draw_name(pixels, sprites[(sprite_num + 6) % 7], ntime + NAME_GAP);
+        draw_name(pixels, sprites[(sprite_num + NAME_COUNT - 1) % NAME_COUNT], ntime + NAME_GAP);
     }
     draw_name(pixels, sprites[sprite_num], ntime);
 }
