@@ -241,7 +241,14 @@ void twister_init(void) {
     cross.faces = cross_faces;
 }
 
+uint32_t SLICE_COLOURS[12] = {
+    0xabdee600, 0xcbaacb00, 0xffffb500, 0xffccb600,
+    0xf3b0c300, 0xc6dbda00, 0xfee1e800, 0xfed7c300,
+    0xf6eac200, 0xecd5e300, 0xff968a00, 0x97c1a900
+};
+
 void twister_frame(uint32_t *pixels, uint32_t time) {
+    double t = (double)time;
     mat4 rotate_matrix;
     mat3 normal_rotate_matrix;
     // mat4 projection_matrix;
@@ -249,48 +256,23 @@ void twister_frame(uint32_t *pixels, uint32_t time) {
     gfx_cls(pixels, 0x00000000);
     gfx3d_clear_zbuffer(zbuffer);
 
-    mat4_identity(rotate_matrix);
-    mat4_rotate_y(rotate_matrix, ((double)time) / 1000);
-    mat4_to_inverse_transpose_mat3(rotate_matrix, normal_rotate_matrix);
+    vec3 light_pos = {0.1, 8, -2};
 
-    vec3 light_pos = {0.1, 4, -2};
+    for (int slice = 0; slice < 12; slice++) {
+        mat4_identity(rotate_matrix);
+        double latent_rotation = 5 * sin(t / 20000 + ((double)slice) / 50);
+        double main_rotation = (1 - cos(pow(t/5000, 2))) * 4 * sin(t / 1000 - ((double)slice) / 15);
+        mat4_rotate_y(rotate_matrix, latent_rotation + main_rotation);
+        mat4_to_inverse_transpose_mat3(rotate_matrix, normal_rotate_matrix);
 
-    vec3 trans1 = {0, 3, 6};
-    mat4_translate(rotate_matrix, trans1);
-    gfx3d_gouraud_mesh(pixels, zbuffer, square, rotate_matrix, normal_rotate_matrix, light_pos, 0x00ffff00);
+        double y_home = (((double)slice) - 5.8) * 0.6;
+        double tsy = t - ((double)slice) * 50;
+        double y = y_home + (0.1 + 22 * pow(2, -0.004 * tsy)) * (1 + sin(tsy / 200));
 
-    trans1.y = -0.5;
-    trans1.z = 0;
+        vec3 trans1 = {0, y, 5.5};
+        mat4_translate(rotate_matrix, trans1);
 
-    mat4_translate(rotate_matrix, trans1);
-    gfx3d_gouraud_mesh(pixels, zbuffer, square, rotate_matrix, normal_rotate_matrix, light_pos, 0x00ffff00);
-
-    mat4_translate(rotate_matrix, trans1);
-    gfx3d_gouraud_mesh(pixels, zbuffer, square, rotate_matrix, normal_rotate_matrix, light_pos, 0x00ffff00);
-
-    mat4_translate(rotate_matrix, trans1);
-    gfx3d_gouraud_mesh(pixels, zbuffer, square, rotate_matrix, normal_rotate_matrix, light_pos, 0x00ffff00);
-
-    mat4_translate(rotate_matrix, trans1);
-    gfx3d_gouraud_mesh(pixels, zbuffer, cross, rotate_matrix, normal_rotate_matrix, light_pos, 0x00ffff00);
-
-    mat4_translate(rotate_matrix, trans1);
-    gfx3d_gouraud_mesh(pixels, zbuffer, cross, rotate_matrix, normal_rotate_matrix, light_pos, 0x00ffff00);
-
-    mat4_translate(rotate_matrix, trans1);
-    gfx3d_gouraud_mesh(pixels, zbuffer, cross, rotate_matrix, normal_rotate_matrix, light_pos, 0x00ffff00);
-
-    mat4_translate(rotate_matrix, trans1);
-    gfx3d_gouraud_mesh(pixels, zbuffer, cross, rotate_matrix, normal_rotate_matrix, light_pos, 0x00ffff00);
-
-    mat4_translate(rotate_matrix, trans1);
-    gfx3d_gouraud_mesh(pixels, zbuffer, square, rotate_matrix, normal_rotate_matrix, light_pos, 0x00ffff00);
-
-    mat4_translate(rotate_matrix, trans1);
-    gfx3d_gouraud_mesh(pixels, zbuffer, square, rotate_matrix, normal_rotate_matrix, light_pos, 0x00ffff00);
-
-    mat4_translate(rotate_matrix, trans1);
-    gfx3d_gouraud_mesh(pixels, zbuffer, square, rotate_matrix, normal_rotate_matrix, light_pos, 0x00ffff00);
-    mat4_translate(rotate_matrix, trans1);
-    gfx3d_gouraud_mesh(pixels, zbuffer, square, rotate_matrix, normal_rotate_matrix, light_pos, 0x00ffff00);
+        gfx3d_model model = (slice >= 4 && slice < 8) ? cross : square;
+        gfx3d_gouraud_mesh(pixels, zbuffer, model, rotate_matrix, normal_rotate_matrix, light_pos, SLICE_COLOURS[slice]);
+    }
 }
