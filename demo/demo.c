@@ -8,6 +8,7 @@
 #include "patarty.h"
 #include "jarig.h"
 #include "physics.h"
+#include "badapple.h"
 
 void demo_init(void) {
     credits_init();
@@ -20,10 +21,11 @@ void demo_init(void) {
     patarty_init();
     jarig_init();
     physics_init();
+    badapple_init();
 }
 
 void demo_frame(uint32_t *pixels, uint32_t time) {
-    video1_frame(pixels, time);
+    badapple_frame(pixels, time);
     /*
     uint32_t scene = (time / 5486) % 7;
     switch (scene) {
