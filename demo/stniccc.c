@@ -114,17 +114,17 @@ void stniccc_frame(uint32_t *pixels, uint32_t time) {
             unsigned char v_count = descriptor & 0x0f;
             unsigned char v0_index = *ptr++;
             unsigned char *v0_data = frame.vertex_data + v0_index * 2;
-            int v0x = v0_data[0];
-            int v0y = v0_data[1];
+            int v0x = v0_data[0] - 32;
+            int v0y = v0_data[1] - 4;
             unsigned char v1_index = *ptr++;
             unsigned char *v1_data = frame.vertex_data + v1_index * 2;
-            int v1x = v1_data[0];
-            int v1y = v1_data[1];
+            int v1x = v1_data[0] - 32;
+            int v1y = v1_data[1] - 4;
             for (int v_index = 2; v_index < v_count; v_index++) {
                 unsigned char v2_index = *ptr++;
                 unsigned char *v2_data = frame.vertex_data + v2_index * 2;
-                int v2x = v2_data[0];
-                int v2y = v2_data[1];
+                int v2x = v2_data[0] - 32;
+                int v2y = v2_data[1] - 4;
                 gfx_filltri(pixels, v0x, v0y, v1x, v1y, v2x, v2y, colour);
                 v1x = v2x;
                 v1y = v2y;
@@ -139,13 +139,13 @@ void stniccc_frame(uint32_t *pixels, uint32_t time) {
             }
             uint32_t colour = frame.palette[descriptor >> 4];
             unsigned char v_count = descriptor & 0x0f;
-            int v0x = *ptr++;
-            int v0y = *ptr++;
-            int v1x = *ptr++;
-            int v1y = *ptr++;
+            int v0x = (*ptr++) - 32;
+            int v0y = (*ptr++) - 4;
+            int v1x = (*ptr++) - 32;
+            int v1y = (*ptr++) - 4;
             for (int v_index = 2; v_index < v_count; v_index++) {
-                int v2x = *ptr++;
-                int v2y = *ptr++;
+                int v2x = (*ptr++) - 32;
+                int v2y = (*ptr++) - 4;
                 gfx_filltri(pixels, v0x, v0y, v1x, v1y, v2x, v2y, colour);
                 v1x = v2x;
                 v1y = v2y;
