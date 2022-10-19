@@ -11,6 +11,7 @@
 #include "badapple.h"
 #include "twister.h"
 #include "stniccc.h"
+#include "prescription.h"
 
 void demo_init(void) {
     credits_init();
@@ -26,10 +27,11 @@ void demo_init(void) {
     badapple_init();
     twister_init();
     stniccc_init();
+    prescription_init();
 }
 
 void demo_frame(uint32_t *pixels, uint32_t time) {
-    stniccc_frame(pixels, time);
+    prescription_frame(pixels, time);
     /*
     uint32_t scene = (time / 5486) % 7;
     switch (scene) {
