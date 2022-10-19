@@ -6,7 +6,7 @@
 
 #define SPRITE_WIDTH 192
 #define SPRITE_HEIGHT 64
-#define NAME_GAP 2000
+#define NAME_GAP 2743
 
 #define NAME_COUNT 8
 

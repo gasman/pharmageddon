@@ -25,7 +25,7 @@ unsigned char *text;
 
 static int font_height, font_width;
 
-static char *message = "Hello party people! We've all seen those videos of extremely demoish pharmacy signs, so it seemed only fair to make a demo about it...";
+static char *message = "Greetings party people! Do you find your regular pharmacy signs not demoscenish enough? Time to make a demo about it...        ";
 
 void scroller_init(void) {
     int n;
@@ -125,7 +125,7 @@ void scroller_frame(uint32_t *pixels, uint32_t time) {
     gfx_cls(pixels, 0x00000000);
 
     for(int i=0;i<CROSSCOUNT;i++) {
-        double scale = fmod((-i*(192/8)) + ((double)time)/5, 192.0);
+        double scale = fmod((-i*(192/8)) + ((double)time)/10, 192.0);
         if(i%2 == 1) {
             plotCross(pixels,96,96,scale,pos,0.05,i*32<<16);
         } else {
