@@ -13,6 +13,7 @@
 #include "stniccc.h"
 #include "prescription.h"
 #include "nyancat.h"
+#include "amigaball.h"
 
 void demo_init(void) {
     credits_init();
@@ -30,6 +31,7 @@ void demo_init(void) {
     stniccc_init();
     prescription_init();
     nyancat_init();
+    amigaball_init();
 }
 
 #define BAR 5486
@@ -37,7 +39,7 @@ void demo_init(void) {
 #define MEME_BAR 4543
 
 void demo_frame(uint32_t *pixels, uint32_t time) {
-    nyancat_frame(pixels, time);
+    amigaball_frame(pixels, time);
     /*
     if (time < BAR * 3) {
         scroller_frame(pixels, time);
