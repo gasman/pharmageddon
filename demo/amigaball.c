@@ -3,6 +3,9 @@
 #include "gfx.h"
 #include "amigaball.h"
 
+#define BACKGROUND_GREY 0xbebabd00
+#define SHADOW_GREY 0x7d7d7d00
+
 gfx_image amigaball[5];
 
 double y_positions[10000];
@@ -34,8 +37,33 @@ void amigaball_init(void) {
     }
 }
 
+void draw_shadow(uint32_t *pixels, gfx_image *image, int x, int y) {
+    int screen_y = y;
+    unsigned char *image_data_row = image->data;
+
+    for (int image_y = 0; image_y < image->height; image_y++) {
+        if (screen_y >= 192) return;
+        if (screen_y >= 0) {
+            uint32_t *screen_pos = pixels + screen_y * 192 + x;
+            int screen_x = x;
+            unsigned char *image_data_pos = image_data_row;
+            for (int image_x = 0; image_x < image->width; image_x++) {
+                if (screen_x >= 192) break;
+                if (screen_x >= 0 && *screen_pos == BACKGROUND_GREY && image_data_pos[0] != 0) {
+                    *screen_pos = SHADOW_GREY;
+                }
+                screen_pos++;
+                image_data_pos += 4;
+                screen_x++;
+            }
+        }
+        screen_y++;
+        image_data_row += image->width * 4;
+    }
+}
+
 void amigaball_frame(uint32_t *pixels, uint32_t time) {
-    gfx_cls(pixels, 0xbebabd00);
+    gfx_cls(pixels, BACKGROUND_GREY);
     for (int x = 0; x < 192; x += 16) {
         gfx_line(pixels, x, 0, x, 191, 0xa1279f00);
     }
@@ -45,6 +73,8 @@ void amigaball_frame(uint32_t *pixels, uint32_t time) {
 
     int ball_x = x_positions[time % 10000];
     int ball_y = y_positions[time % 10000];
-    int ball_sprite = (time / 50) % 5;
-    gfx_drawimage(pixels, &amigaball[ball_sprite], ball_x - 32, ball_y - 32);
+    gfx_image image = amigaball[(time / 50) % 5];
+
+    draw_shadow(pixels, &image, ball_x - 16, ball_y - 28);
+    gfx_drawimage(pixels, &image, ball_x - 32, ball_y - 32);
 }
