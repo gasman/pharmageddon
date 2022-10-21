@@ -13,9 +13,11 @@ double zbuffer[192*192];
 gfx3d_model virus0;
 gfx3d_model virus1;
 gfx_image title_image;
+gfx_image background;
 
 void title_init(void) {
     gfx_loadimage("../assets/pharmageddon.png", &title_image);
+    gfx_loadimage("../assets/lavalamp-green2.png", &background);
 
     // Start the import on the given file with some example postprocessing
     // Usually - if speed is not the most important aspect for you - you'll t
@@ -53,6 +55,8 @@ void title_frame(uint32_t *pixels, uint32_t time) {
     mat4_to_inverse_transpose_mat3(rotate_matrix, normal_rotate_matrix);
 
     vec3 light_pos = {5 - ((double)time) / 4000, 1, 0};
+
+    gfx_rotateimage(pixels, &background, 96, 96, (double)time/20000, 0.6);
 
     gfx3d_gouraud_mesh(pixels, zbuffer, virus0, rotate_matrix, normal_rotate_matrix, light_pos, 0x00ff0000);
     gfx3d_gouraud_mesh(pixels, zbuffer, virus1, rotate_matrix, normal_rotate_matrix, light_pos, 0x60a06000);
