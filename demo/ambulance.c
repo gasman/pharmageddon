@@ -72,28 +72,57 @@ void ambulance_frame(uint32_t *pixels, uint32_t time) {
     gfx_cls(pixels, 0x00110000);
     gfx3d_clear_zbuffer(zbuffer);
 
-    mat4_identity(camera_matrix);
-    mat4_rotate_y(camera_matrix, ((double)time) / 1000);
-    vec3 trans_camera = {0, 0, 7};
-    mat4_translate(camera_matrix, trans_camera);
-
-    mat4_identity(ambulance_matrix);
-    vec3 trans1 = {0, -2, -3};
-    mat4_translate(ambulance_matrix, trans1);
-    mat4_rotate_x(ambulance_matrix, sin(((double)time) / 400) / 8);
-
     mat4 ambulance_matrix_final;
-    mat4_mul(ambulance_matrix_final, camera_matrix, ambulance_matrix);
-    mat4_to_inverse_transpose_mat3(ambulance_matrix_final, normal_ambulance_matrix);
-
     mat4 stars_matrix, stars_matrix_final;
-    mat4_identity(stars_matrix);
-    vec3 stars_trans = {-0.5, -0.5, -0.5};
-    mat4_translate(stars_matrix, stars_trans);
-    mat4_scale(stars_matrix, 16);
-    mat4_mul(stars_matrix_final, camera_matrix, stars_matrix);
+    vec3 light_pos;
 
-    vec3 light_pos = {0, 10, -2};
+    if (time < 3840) {
+        mat4_identity(camera_matrix);
+        mat4_rotate_y(camera_matrix, -1.3);
+        vec3 trans_camera = {0, 0, 2 + ((double)time)*5/3840 };
+        mat4_translate(camera_matrix, trans_camera);
+
+        mat4_identity(ambulance_matrix);
+        vec3 trans1 = {0, -2, 1-(double)time/1000};
+        mat4_translate(ambulance_matrix, trans1);
+        mat4_rotate_x(ambulance_matrix, sin(((double)time) / 400) / 8);
+
+        mat4_mul(ambulance_matrix_final, camera_matrix, ambulance_matrix);
+        mat4_to_inverse_transpose_mat3(ambulance_matrix_final, normal_ambulance_matrix);
+
+        mat4_identity(stars_matrix);
+        vec3 stars_trans = {-0.5, -0.5, -0.5};
+        mat4_translate(stars_matrix, stars_trans);
+        mat4_scale(stars_matrix, 16);
+        mat4_mul(stars_matrix_final, camera_matrix, stars_matrix);
+
+        light_pos.x = 0;
+        light_pos.y = 10;
+        light_pos.z = -2;
+    } else {
+        mat4_identity(camera_matrix);
+        mat4_rotate_y(camera_matrix, 2.54-((double)time) / 1000);
+        vec3 trans_camera = {0, 0, 7};
+        mat4_translate(camera_matrix, trans_camera);
+
+        mat4_identity(ambulance_matrix);
+        vec3 trans1 = {0, -2, -3};
+        mat4_translate(ambulance_matrix, trans1);
+        mat4_rotate_x(ambulance_matrix, sin(((double)time) / 400) / 8);
+
+        mat4_mul(ambulance_matrix_final, camera_matrix, ambulance_matrix);
+        mat4_to_inverse_transpose_mat3(ambulance_matrix_final, normal_ambulance_matrix);
+
+        mat4_identity(stars_matrix);
+        vec3 stars_trans = {-0.5, -0.5, -0.5};
+        mat4_translate(stars_matrix, stars_trans);
+        mat4_scale(stars_matrix, 16);
+        mat4_mul(stars_matrix_final, camera_matrix, stars_matrix);
+
+        light_pos.x = 0;
+        light_pos.y = 10;
+        light_pos.z = -2;
+    }
 
     gfx3d_gouraud_tex_mesh(pixels, zbuffer, ambulance, ambulance_matrix_final, normal_ambulance_matrix, light_pos);
 
