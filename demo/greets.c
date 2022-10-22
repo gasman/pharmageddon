@@ -28,7 +28,7 @@ static unsigned int char_offsets[FONT_LENGTH];
 static unsigned char *text;
 static int font_height, font_width;
 
-static char *message = "                                           These folks deserve their names in lights... DUB, Slipstream, Aardbei, T$, Jumalauta, Oxygene, ThePetsMode, Truck, RC55, AYCE, Onslaught, Rift, TiTAN, Loonies, Pandacube, Bitshifters, 5711, Farbrausch, TUHB, Furry Trash Group, Spaceballs, SMFX, F#READY, Desire, Trepaan, Poo-Brain, RBBS, D.Fox, Dojoe, Conspiracy, ScenePT All Stars, Logicoma... and you! Please take your prescription.                                                                      ";
+static char *message = "                                           These folks deserve their names in lights... DUB, Slipstream, Aardbei, T$, Jumalauta, Oxygene, ThePetsMode, Truck, RC55, AYCE, Onslaught, Rift, TiTAN, Loonies, Pandacube, Bitshifters, CSC, 5711, Farbrausch, TUHB, Furry Trash Group, Spaceballs, SMFX, F#READY, Desire, Trepaan, Poo-Brain, RBBS, D.Fox, Dojoe, Conspiracy, ScenePT All Stars, Logicoma... and you! Please take your prescription.                                                                      ";
 
 void greets_init(void) {
     video_open("../assets/pharma5.mpg", &greetsvid);
