@@ -14,8 +14,11 @@ vec3 mat4_mul_vec3(vec3 vec, mat4 mat);
 vec3 mat3_mul_vec3(vec3 vec, mat3 mat);
 void mat4_rotate_x(mat4 mat, double angle);
 void mat4_rotate_y(mat4 mat, double angle);
+void mat4_scale(mat4 mat, double scale);
 void mat4_translate(mat4 mat, vec3 vec);
 void mat4_to_inverse_transpose_mat3(mat4 mat, mat3 dest);
 
 vec3 vec3_normalize(vec3 vec);
 double vec3_dot(vec3 v1, vec3 v2);
+
+void mat4_print(mat4 mat);

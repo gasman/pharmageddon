@@ -612,7 +612,7 @@ void gfx3d_clear_zbuffer(double *zbuffer) {
     }
 }
 
-void gfx3d_transform_vertices(gfx3d_model mesh, mat4 rotate_matrix, mat3 normal_rotate_matrix, vec3 light_pos) {
+static void gfx3d_transform_vertices_gouraud(gfx3d_model mesh, mat4 rotate_matrix, mat3 normal_rotate_matrix, vec3 light_pos) {
     for (unsigned int i = 0; i < mesh.vertex_count; i++) {
         vec3 pos = mat4_mul_vec3(mesh.vertices[i].position, rotate_matrix);
         vec3 normal = mat3_mul_vec3(vec3_normalize(mesh.vertices[i].normal), normal_rotate_matrix);
@@ -632,8 +632,21 @@ void gfx3d_transform_vertices(gfx3d_model mesh, mat4 rotate_matrix, mat3 normal_
     }
 }
 
+static void gfx3d_transform_vertices_flat(gfx3d_model mesh, mat4 rotate_matrix) {
+    for (unsigned int i = 0; i < mesh.vertex_count; i++) {
+        vec3 pos = mat4_mul_vec3(mesh.vertices[i].position, rotate_matrix);
+
+        // hacky perspective transform
+        vec3 projected_pos = {pos.x/pos.z, pos.y/pos.z, pos.z};
+        mesh.transformed_vertices[i].position = projected_pos;
+
+        mesh.transformed_vertices[i].u = mesh.vertices[i].u;
+        mesh.transformed_vertices[i].v = mesh.vertices[i].v;
+    }
+}
+
 void gfx3d_gouraud_tex_mesh(uint32_t *pixels, double *zbuffer, gfx3d_model mesh, mat4 rotate_matrix, mat3 normal_rotate_matrix, vec3 light_pos) {
-    gfx3d_transform_vertices(mesh, rotate_matrix, normal_rotate_matrix, light_pos);
+    gfx3d_transform_vertices_gouraud(mesh, rotate_matrix, normal_rotate_matrix, light_pos);
 
     for (unsigned int i = 0; i < mesh.face_count; i++) {
         gfx3d_face face = mesh.faces[i];
@@ -648,7 +661,7 @@ void gfx3d_gouraud_tex_mesh(uint32_t *pixels, double *zbuffer, gfx3d_model mesh,
 }
 
 void gfx3d_gouraud_mesh(uint32_t *pixels, double *zbuffer, gfx3d_model mesh, mat4 rotate_matrix, mat3 normal_rotate_matrix, vec3 light_pos, uint32_t colour) {
-    gfx3d_transform_vertices(mesh, rotate_matrix, normal_rotate_matrix, light_pos);
+    gfx3d_transform_vertices_gouraud(mesh, rotate_matrix, normal_rotate_matrix, light_pos);
 
     for (unsigned int i = 0; i < mesh.face_count; i++) {
         gfx3d_face face = mesh.faces[i];
@@ -659,5 +672,67 @@ void gfx3d_gouraud_mesh(uint32_t *pixels, double *zbuffer, gfx3d_model mesh, mat
         gfx3d_gouraud_tri(
             pixels, zbuffer, va0, va1, va2, colour
         );
+    }
+}
+
+void gfx3d_flat_mesh(uint32_t *pixels, double *zbuffer, gfx3d_model mesh, mat4 rotate_matrix, uint32_t colour) {
+    vec3 light_pos = {0, 0, 0};
+    gfx3d_transform_vertices_flat(mesh, rotate_matrix);
+
+    for (unsigned int i = 0; i < mesh.face_count; i++) {
+        gfx3d_face face = mesh.faces[i];
+        vertex_out_attrs va0 = mesh.transformed_vertices[face.index1];
+        vertex_out_attrs va1 = mesh.transformed_vertices[face.index2];
+        vertex_out_attrs va2 = mesh.transformed_vertices[face.index3];
+
+        gfx3d_flat_tri(
+            pixels, zbuffer, va0.position, va1.position, va2.position, colour
+        );
+    }
+}
+
+void gfx3d_point_mesh(uint32_t *pixels, double *zbuffer, gfx3d_model mesh, mat4 rotate_matrix, uint32_t colour) {
+    vec3 light_pos = {0, 0, 0};
+    gfx3d_transform_vertices_flat(mesh, rotate_matrix);
+
+    for (unsigned int i = 0; i < mesh.vertex_count; i++) {
+        vec3 v = mesh.transformed_vertices[i].position;
+        int vx = (int)(96 + 96 * v.x);
+        int vy = (int)(96 - 96 * v.y);
+        if (vx >= 0 && vx < 192 && vy >= 0 && vy < 192 && v.z > 0.5 && zbuffer[vy * 192 + vx] > v.z) {
+            gfx_fillcircle(pixels, vx, vy, (int)(8.0/v.z), colour);
+        }
+    }
+}
+
+static void gfx3d_transform_vertices_starfield(gfx3d_model mesh, mat4 rotate_matrix, uint32_t time) {
+    for (unsigned int i = 0; i < mesh.vertex_count; i++) {
+        vec3 raw_pos = {
+            mesh.vertices[i].position.x,
+            mesh.vertices[i].position.y,
+            fmod(mesh.vertices[i].position.z + ((double)time)/1000, 1)
+        };
+        vec3 pos = mat4_mul_vec3(raw_pos, rotate_matrix);
+
+        // hacky perspective transform
+        vec3 projected_pos = {pos.x/pos.z, pos.y/pos.z, pos.z};
+        mesh.transformed_vertices[i].position = projected_pos;
+
+        mesh.transformed_vertices[i].u = mesh.vertices[i].u;
+        mesh.transformed_vertices[i].v = mesh.vertices[i].v;
+    }
+}
+
+void gfx3d_point_mesh_starfield(uint32_t *pixels, double *zbuffer, gfx3d_model mesh, mat4 rotate_matrix, uint32_t colour, uint32_t time) {
+    vec3 light_pos = {0, 0, 0};
+    gfx3d_transform_vertices_starfield(mesh, rotate_matrix, time);
+
+    for (unsigned int i = 0; i < mesh.vertex_count; i++) {
+        vec3 v = mesh.transformed_vertices[i].position;
+        int vx = (int)(96 + 96 * v.x);
+        int vy = (int)(96 - 96 * v.y);
+        if (vx >= 0 && vx < 192 && vy >= 0 && vy < 192 && v.z > 0.5 && zbuffer[vy * 192 + vx] > v.z) {
+            gfx_fillcircle(pixels, vx, vy, (int)(8.0/v.z), colour);
+        }
     }
 }

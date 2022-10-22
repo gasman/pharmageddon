@@ -1,6 +1,7 @@
 #include "matrix.h"
 
 #include <math.h>
+#include <stdio.h>
 
 
 void mat4_identity(mat4 out) {
@@ -181,4 +182,15 @@ vec3 vec3_normalize(vec3 vec) {
 
 double vec3_dot(vec3 v1, vec3 v2) {
     return v1.x*v2.x + v1.y*v2.y + v1.z*v2.z;
+}
+
+void mat4_print(mat4 mat) {
+    printf("%f %f %f %f\n", mat[0], mat[1], mat[2], mat[3]);
+    printf("%f %f %f %f\n", mat[4], mat[5], mat[6], mat[7]);
+    printf("%f %f %f %f\n", mat[8], mat[9], mat[10], mat[11]);
+    printf("%f %f %f %f\n", mat[12], mat[13], mat[14], mat[15]);
+}
+
+void mat4_scale(mat4 mat, double scale) {
+    for (int i = 0; i < 12; i++) mat[i] *= scale;
 }

@@ -39,7 +39,7 @@ void demo_init(void) {
 #define MEME_BAR 4543
 
 void demo_frame(uint32_t *pixels, uint32_t time) {
-    title_frame(pixels, time);
+    ambulance_frame(pixels, time);
     /*
     if (time < BAR * 3) {
         scroller_frame(pixels, time);
