@@ -14,6 +14,7 @@
 #include "prescription.h"
 #include "nyancat.h"
 #include "amigaball.h"
+#include "farjan.h"
 
 void demo_init(void) {
     credits_init();
@@ -32,6 +33,7 @@ void demo_init(void) {
     prescription_init();
     nyancat_init();
     amigaball_init();
+    farjan_init();
 }
 
 #define BAR 3840
@@ -79,7 +81,7 @@ void demo_frame(uint32_t *pixels, uint32_t time) {
     } else if (time < MEME5_END) {
         nyancat_frame(pixels, time);
     } else if (time < MEME6_END) {
-        jarig_frame(pixels, time);  // REPLACE
+        farjan_frame(pixels, time);
     } else if (time < MEME7_END) {
         patarty_frame(pixels, time);  // REPLACE
     } else if (time < MEME8_END) {
