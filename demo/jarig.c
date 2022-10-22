@@ -13,12 +13,12 @@ void jarig_init(void) {
 
 void jarig_frame(uint32_t *pixels, uint32_t time) {
     gfx_cls(pixels, 0x00000000);
-    if (time % 700 < 350) {
+    if (time % 800 < 400) {
         gfx_drawimage(pixels, &jarig1, 96 - jarig1.width / 2, 64);
     } else {
         gfx_drawimage(pixels, &jarig2, 96 - jarig2.width / 2, 64);
     }
-    if (time % 350 < 175) {
+    if (time % 400 < 200) {
         gfx_drawimage(pixels, &hetedansactie1, 192 - hetedansactie1.width, 64);
     } else {
         gfx_drawimage(pixels, &hetedansactie2, 192 - hetedansactie2.width, 64);

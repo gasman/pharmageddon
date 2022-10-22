@@ -6,9 +6,6 @@
 gfx_image farjan;
 gfx_image waves;
 
-double y_positions[10000];
-double x_positions[10000];
-
 void farjan_init(void) {
     gfx_loadimage("../assets/farjan.png", &farjan);
     gfx_loadimage("../assets/waves.png", &waves);

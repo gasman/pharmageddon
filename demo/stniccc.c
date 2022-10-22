@@ -97,7 +97,7 @@ void stniccc_init(void) {
 }
 
 void stniccc_frame(uint32_t *pixels, uint32_t time) {
-    stniccc_video_frame frame = frames[time / 50];
+    stniccc_video_frame frame = frames[time / 50 + 45];
 
     if (frame.clear_screen) {
         gfx_cls(pixels, 0x00000000);
