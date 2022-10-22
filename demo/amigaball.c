@@ -3,8 +3,8 @@
 #include "gfx.h"
 #include "amigaball.h"
 
-#define BACKGROUND_GREY 0xbebabd00
-#define SHADOW_GREY 0x7d7d7d00
+#define BACKGROUND_GREY 0x88888800
+#define SHADOW_GREY 0x66666600
 
 gfx_image amigaball[5];
 
