@@ -79,12 +79,18 @@ void demo_frame(uint32_t *pixels, uint32_t time) {
     } else if (time < MEMES) {
         prescription_frame(pixels, time - EFFECT1_END);
     } else if (time < MEME8_END) {
-        if ((time - MEMES) % 400 < 20) {
-            gfx_cls(pixels, 0xffffff00);
-        } else if (time < MEME1_END) {
-            patarty_frame(pixels, time - MEMES);
+        if (time < MEME1_END) {
+            if ((time - MEMES) % 400 < 30) {
+                gfx_cls(pixels, 0xffffff00);
+            } else {
+                patarty_frame(pixels, time - MEMES);
+            }
         } else if (time < MEME2_END) {
-            nyancat_frame(pixels, time);
+            if ((time - MEMES) % 400 < 30) {
+                gfx_cls(pixels, 0xffffff00);
+            } else {
+                nyancat_frame(pixels, time);
+            }
         } else if (time < MEME3_END) {
             jarig_frame(pixels, time - MEME2_END);
         } else if (time < MEME4_END) {
@@ -94,7 +100,11 @@ void demo_frame(uint32_t *pixels, uint32_t time) {
         } else if (time < MEME6_END) {
             tomato_frame(pixels, time - MEME5_END);
         } else if (time < MEME7_END) {
-            farjan_frame(pixels, time - MEME6_END);
+            if ((time - MEMES) % 400 < 30) {
+                gfx_cls(pixels, 0xffffff00);
+            } else {
+                farjan_frame(pixels, time - MEME6_END);
+            }
         } else {
             stniccc_frame(pixels, time - MEME7_END);
         }
