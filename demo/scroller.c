@@ -6,7 +6,7 @@
 #include "scroller.h"
 #include "stb_image.h"
 
-unsigned char *font;
+static unsigned char *font;
 
 #define FONT_LENGTH 91
 
@@ -21,7 +21,7 @@ static unsigned char char_widths[FONT_LENGTH] = {
     8, 8, 8, 8, 6, 7, 6, 8, 8, 12, 8, 8, 8
 };
 static unsigned int char_offsets[FONT_LENGTH];
-unsigned char *text;
+static unsigned char *text;
 
 static int font_height, font_width;
 

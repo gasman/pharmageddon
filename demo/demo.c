@@ -103,7 +103,7 @@ void demo_frame(uint32_t *pixels, uint32_t time) {
     } else if (time < VIDEO_END) {
         video1_frame(pixels, time);
     } else if (time < MUSIC_END) {
-        greets_frame(pixels, time);
+        greets_frame(pixels, time - VIDEO_END);
     } else {
         gfx_cls(pixels, 0x00000000);
     }
