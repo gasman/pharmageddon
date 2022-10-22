@@ -13,7 +13,7 @@ void farjan_init(void) {
 
 
 void farjan_frame(uint32_t *pixels, uint32_t time) {
-    gfx_cls(pixels, 0x9999cc00);
+    gfx_cls(pixels, 0x8585b200);
     double t = (double)time;
 
     gfx_rotateimage(pixels, &farjan, 96, 96 + 8*cos((t-200)/400), -(double)time/20000, 0.3);
