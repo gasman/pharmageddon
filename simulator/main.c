@@ -25,7 +25,7 @@ int main(int argc, char *argv[])
     }
 
     Mix_OpenAudio(44100, AUDIO_S16SYS, 2, 640);
-    Mix_Music *music = Mix_LoadMUS("../assets/midi-massacre.mp3");
+    Mix_Music *music = Mix_LoadMUS("../assets/pharmageddon.mp3");
 
     SDL_Window *window = SDL_CreateWindow(
         "Pharmageddon", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,

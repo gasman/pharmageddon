@@ -25,7 +25,7 @@ unsigned char *text;
 
 static int font_height, font_width;
 
-static char *message = "Greetings party people! Do you find your regular pharmacy signs not demoscenish enough? Time to make a demo about it...        ";
+static char *message = "                                           Greetings party people! Are you tired of your regular pharmacy signs? Do you wish that they could be a bit more demosceneish? Time to make a demo about it...                                               ";
 
 void scroller_init(void) {
     int n;
@@ -119,6 +119,7 @@ void plotCross(uint32_t *pixels, float x, float y, float h, float bpos, float bs
 
 void scroller_frame(uint32_t *pixels, uint32_t time) {
     unsigned char *text_ptr = text + font_height * (time/20);
+    unsigned char *text_bar_start = text + font_height * 350;
 
     double pos = fmod(((double)time)/5000.0, 1.0);
 
@@ -142,7 +143,9 @@ void scroller_frame(uint32_t *pixels, uint32_t time) {
         );
         uint32_t *screen_ptr = pixels + 192 * y_top + x;
         for (int y = 0; y < font_height; y++) {
-            *screen_ptr = 0x00010000 * (*text_ptr);
+            if (text_ptr >= text_bar_start) {
+                *screen_ptr = 0x00010000 * (*text_ptr);
+            }
             text_ptr++;
             screen_ptr += 192;
         }

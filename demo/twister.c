@@ -248,7 +248,7 @@ uint32_t SLICE_COLOURS[12] = {
 };
 
 void twister_frame(uint32_t *pixels, uint32_t time) {
-    double t = (double)time;
+    double t = (double)time + 300;
     mat4 rotate_matrix;
     mat3 normal_rotate_matrix;
     // mat4 projection_matrix;

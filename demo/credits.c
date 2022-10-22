@@ -6,7 +6,7 @@
 
 #define SPRITE_WIDTH 192
 #define SPRITE_HEIGHT 64
-#define NAME_GAP 2743
+#define NAME_GAP 1920
 
 #define NAME_COUNT 8
 
@@ -17,12 +17,12 @@ void credits_init(void) {
     /* load as greyscale bitmap */
     sprites[0] = stbi_load("../assets/gasman.png", &w, &h, &n, 1);
     sprites[1] = stbi_load("../assets/nico.png", &w, &h, &n, 1);
-    sprites[2] = stbi_load("../assets/superogue.png", &w, &h, &n, 1);
-    sprites[3] = stbi_load("../assets/aldroid.png", &w, &h, &n, 1);
-    sprites[4] = stbi_load("../assets/mantratronic.png", &w, &h, &n, 1);
-    sprites[5] = stbi_load("../assets/raccoonviolet.png", &w, &h, &n, 1);
-    sprites[6] = stbi_load("../assets/tobach.png", &w, &h, &n, 1);
-    sprites[7] = stbi_load("../assets/stormcaller.png", &w, &h, &n, 1);
+    sprites[2] = stbi_load("../assets/raccoonviolet.png", &w, &h, &n, 1);
+    sprites[3] = stbi_load("../assets/stormcaller.png", &w, &h, &n, 1);
+    sprites[4] = stbi_load("../assets/superogue.png", &w, &h, &n, 1);
+    sprites[5] = stbi_load("../assets/tobach.png", &w, &h, &n, 1);
+    sprites[6] = stbi_load("../assets/present.png", &w, &h, &n, 1);
+    sprites[7] = stbi_load("../assets/at-trsac-2022.png", &w, &h, &n, 1);
 }
 
 

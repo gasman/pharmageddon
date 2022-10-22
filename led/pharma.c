@@ -31,7 +31,7 @@ int main(int argc, char **argv) {
   }
 
   Mix_OpenAudio(44100, AUDIO_S16SYS, 2, 640);
-  Mix_Music *music = Mix_LoadMUS("../assets/midi-massacre.mp3");
+  Mix_Music *music = Mix_LoadMUS("../assets/pharmageddon.mp3");
 
   struct RGBLedMatrixOptions options;
   struct RGBLedMatrix *matrix;

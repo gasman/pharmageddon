@@ -34,49 +34,57 @@ void demo_init(void) {
     amigaball_init();
 }
 
-#define BAR 5486
-#define MEMES BAR * 21
-#define MEME_BAR 4543
+#define BAR 3840
+
+#define SCROLLER_END BAR * 7
+#define BOARDS_END BAR * 9
+#define CREDITS_END BAR * 13
+#define TITLE_END BAR * 17
+#define AMBULANCE_END BAR * 22
+#define EFFECT1_END BAR * 26
+#define MEMES 118000
+#define MEMES_BAR 3200
+#define MEME1_END MEMES + MEMES_BAR * 1
+#define MEME2_END MEMES + MEMES_BAR * 2
+#define MEME3_END MEMES + MEMES_BAR * 3
+#define MEME4_END MEMES + MEMES_BAR * 4
+#define MEME5_END MEMES + MEMES_BAR * 5
+#define MEME6_END MEMES + MEMES_BAR * 6
+#define MEME7_END MEMES + MEMES_BAR * 7
+#define MEME8_END MEMES + MEMES_BAR * 8
 
 void demo_frame(uint32_t *pixels, uint32_t time) {
-    ambulance_frame(pixels, time);
-    /*
-    if (time < BAR * 3) {
+    if (time < SCROLLER_END) {
         scroller_frame(pixels, time);
-    } else if (time < BAR * 7) {
-        credits_frame(pixels, time - BAR * 3);
-    } else if (time < BAR * 9) {
-        title_frame(pixels, time - BAR * 7);
-    } else if (time < BAR * 11) {
-        ambulance_frame(pixels, time);
-    } else if (time < BAR * 13) {
-        planes_frame(pixels, time);
-    } else if (time < BAR * 15) {
-        video1_frame(pixels, time);
-    } else if (time < BAR * 18) {
-        twister_frame(pixels, time - BAR * 15);
-    } else if (time < MEMES) {
-        prescription_frame(pixels, time - BAR * 18);
-    } else if (time < MEMES + MEME_BAR) {
-        jarig_frame(pixels, time);
-    } else if (time < MEMES + MEME_BAR * 2) {
-        patarty_frame(pixels, time);
-    } else if (time < MEMES + MEME_BAR * 3) {
-        badapple_frame(pixels, time);
-    } else if (time < MEMES + MEME_BAR * 4) {
-        stniccc_frame(pixels, time - (MEMES + MEME_BAR * 3));
-    } else {
+    } else if (time < BOARDS_END) {
         boards_frame(pixels, time);
+    } else if (time < CREDITS_END) {
+        credits_frame(pixels, time - BOARDS_END);
+    } else if (time < TITLE_END) {
+        title_frame(pixels, time - CREDITS_END);
+    } else if (time < AMBULANCE_END) {
+        ambulance_frame(pixels, time - TITLE_END);
+    } else if (time < EFFECT1_END) {
+        twister_frame(pixels, time - AMBULANCE_END);
+    } else if (time < MEMES) {
+        prescription_frame(pixels, time - EFFECT1_END);
+    } else if (time < MEME1_END) {
+        amigaball_frame(pixels, time - MEMES);
+    } else if (time < MEME2_END) {
+        jarig_frame(pixels, time);
+    } else if (time < MEME3_END) {
+        patarty_frame(pixels, time);
+    } else if (time < MEME4_END) {
+        badapple_frame(pixels, time);
+    } else if (time < MEME5_END) {
+        nyancat_frame(pixels, time);
+    } else if (time < MEME6_END) {
+        jarig_frame(pixels, time);  // REPLACE
+    } else if (time < MEME7_END) {
+        patarty_frame(pixels, time);  // REPLACE
+    } else if (time < MEME8_END) {
+        stniccc_frame(pixels, time - MEME7_END);
+    } else {
+        video1_frame(pixels, time - MEME8_END);
     }
-    */
-    /*
-    uint32_t scene = (time / 5486) % 7;
-    switch (scene) {
-        case 0:
-            scroller_frame(pixels, time);
-            break;
-        default:
-            boards_frame(pixels, time);
-    }
-    */
 }
